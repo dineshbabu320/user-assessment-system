@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attempts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('exam_id')->constrained()->onDelete('cascade');
-            $table->integer('score')->nullable();
-            $table->enum('status', ['passed', 'failed', 'in_progress'])->default('in_progress');
-            $table->timestamp('submitted_at')->nullable();
-            $table->timestamps();
+            $table->uuid('id')->primary();
+            $table->string('user_cid');
+            $table->foreign('user_cid')->references('cid')->on('users')->onDelete('cascade');
+            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->tinyInteger('attempt_number'); // 1st, 2nd, or 3rd attempt
+            $table->timestamp('attempted_at')->useCurrent();
+            $table->enum('status', ['passed', 'failed']);
+            $table->timestamp('cooldown_until')->nullable(); // 7 days (1st fail), 14 days (2nd fail)
         });
     }
 

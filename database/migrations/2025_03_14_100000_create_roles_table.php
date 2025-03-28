@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // Example: student, mentor, director
-            $table->timestamps();
+            $table->string('name')->unique(); // Student, Subdivision Director, Admin
         });
+    
     }
 
     /**

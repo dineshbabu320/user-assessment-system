@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained()->onDelete('cascade');
-            $table->text('answer_text');
-            $table->boolean('is_correct')->default(false);
-            $table->timestamps();
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
+            $table->string('answer_text'); // Only for multiple-choice & true/false
+            $table->boolean('is_correct')->default(false); // True only for the correct answer
         });
     }
 

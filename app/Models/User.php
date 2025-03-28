@@ -11,7 +11,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['vatsim_id', 'name', 'email', 'role_id', 'subdivision_id'];
+    protected $primaryKey = 'cid';
+
+    protected $fillable = ['cid', 'name', 'email','atc_rating', 'role_id', 'subdivision_id'];
 
     public function role()
     {

@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('vatsim_id')->unique(); // VATSIM ID
+            $table->string('cid')->primary(); // VATSIM ID as the primary key
             $table->string('name');
             $table->string('email')->unique();
-            $table->foreignId('role_id')->constrained()->onDelete('cascade'); // Role assigned to user
-            $table->foreignId('subdivision_id')->nullable()->constrained()->onDelete('set null'); // NULL for directors
+            $table->integer('atc_rating');
+            $table->foreignId('role_id')->constrained('roles');
+            $table->string('subdivision_id');
             $table->timestamps();
         });
     }

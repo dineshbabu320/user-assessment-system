@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tokens', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Student
-            $table->foreignId('exam_id')->constrained()->onDelete('cascade');
-            $table->foreignId('issued_by')->constrained('users')->onDelete('cascade'); // Mentor or Director
-            $table->enum('status', ['issued', 'revoked', 'used'])->default('issued');
-            $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
+        Schema::create('exam_tokens', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('user_cid');
+            $table->foreign('user_cid')->references('cid')->on('users')->onDelete('cascade');
+            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->timestamp('issued_at')->useCurrent();
+            $table->timestamp('expires_at'); // Set to 14 days from issued_at
         });
     }
 

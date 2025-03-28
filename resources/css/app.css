@@ -16,3 +16,13 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+#main-content {
+    transition: margin-left 0.3s ease-in-out;
+}
+
+@media (max-width: 639px) {
+    #main-content {
+        margin-left: 0 !important; /* Remove margin for smaller screens */
+    }
+}

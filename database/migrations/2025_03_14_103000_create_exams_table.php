@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique(); // Dynamic exam names (e.g., S1, S2, etc.)
-            $table->timestamps();
         });
     }
 

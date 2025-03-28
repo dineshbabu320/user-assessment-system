@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('exam_id')->constrained()->onDelete('cascade');
+            $table->id(); // Auto-incrementing question ID
+            $table->unsignedBigInteger('exam_id');
             $table->text('question_text');
-            $table->enum('question_type', ['mcq', 'text', 'true_false']);
+            $table->json('options'); // Store multiple choices
+            $table->string('correct_answer'); // Store correct option
             $table->timestamps();
+
+            // Foreign key relationships
+            $table->foreign('exam_id')->references('id')->on('exams')->cascadeOnDelete();
         });
     }
 

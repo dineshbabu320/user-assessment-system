@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="ml-64 pt-20 pb-6 pl-4 pr-4">
+<div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4">
 <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Select all that apply</h3>
 <ul class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
     <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">

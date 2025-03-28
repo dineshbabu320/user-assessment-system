@@ -40,3 +40,18 @@ themeToggleBtn.addEventListener('click', function() {
     }
     
 });
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     const sidebar = document.getElementById('logo-sidebar');
+//     const mainContent = document.getElementById('main-content');
+//     const toggleButton = document.querySelector('[data-drawer-toggle="logo-sidebar"]');
+
+//     toggleButton.addEventListener('click', function () {
+//         sidebar.classList.toggle('-translate-x-full'); // Toggle sidebar visibility
+//         if (sidebar.classList.contains('-translate-x-full')) {
+//             mainContent.classList.remove('ml-64'); // Remove margin when sidebar is collapsed
+//         } else {
+//             mainContent.classList.add('ml-64'); // Add margin when sidebar is expanded
+//         }
+//     });
+// });

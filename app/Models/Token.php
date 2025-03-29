@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Token extends Model
 {
-    use HasFactory;
 
     protected $fillable = ['user_id', 'exam_id', 'issued_by', 'status', 'expires_at'];
 

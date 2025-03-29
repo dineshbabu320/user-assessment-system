@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'hasExamToken' => \App\Http\Middleware\HasExamToken::class,
+            'roleAboveStudent' => \App\Http\Middleware\roleAboveStudent::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

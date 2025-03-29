@@ -1,32 +1,45 @@
 <?php
-
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
-    protected $primaryKey = 'cid';
+    protected $primaryKey = 'cid'; // VATSIM ID is the primary key
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    protected $fillable = ['cid', 'name', 'email','atc_rating', 'role_id', 'subdivision_id'];
+    protected $fillable = [
+        'cid',
+        'name',
+        'email',
+        'atc_rating',
+        'role_id',
+        'subdivision_id',
+    ];
 
-    public function role()
+    public function role(): BelongsTo
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
-    public function subdivision()
+    public function subdivision(): BelongsTo
     {
-        return $this->belongsTo(Subdivision::class);
+        return $this->belongsTo(Subdivision::class, 'subdivision_id');
     }
 
-    public function tokens()
+    // Role Helper Methods
+    public function isAdmin(): bool
     {
-        return $this->hasMany(Token::class);
+        return $this->role_id == 3;
+    }
+
+    public function isSubdivisionDirector(): bool
+    {
+        return $this->role_id == 2;
     }
 }

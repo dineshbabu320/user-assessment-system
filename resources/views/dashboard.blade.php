@@ -16,7 +16,7 @@
             <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Exam Token Status</h5>
             @if($active_token)
                 <p class="font-normal text-gray-700 dark:text-gray-400">Active Exam: {{ $active_token->exam->name }}</p>
-                <p class="font-normal text-gray-700 dark:text-gray-400">Expires on: {{ $active_token->expires_at->format('Y-m-d H:i') }}</p>
+                <p class="font-normal text-gray-700 dark:text-gray-400">Expires on: {{ $active_token->expires_at->format('d-m-Y') }}</p>
             @else
                 <p class="font-normal text-gray-700 dark:text-gray-400">No active exam tokens.</p>
             @endif

@@ -102,15 +102,12 @@ class LoginController extends Controller
      */
     protected function completeLogin($data, $token)
     {
-        $account = User::updateOrCreate(
-            ['cid' => $data->cid],
-            [
-                'name' => $data->personal->name_full,
-                'email' => $data->personal->email,
-                'atc_rating' => $data->vatsim->rating->id,
-                'subdivision_id' => $data->vatsim->subdivision->id,
-            ]
-        );
+        $account = User::firstOrNew(['cid' => $data->cid]);
+
+        $account->name = $data->personal->name_full;
+        $account->email = $data->personal->email;
+        $account->atc_rating = $data->vatsim->rating->id;
+        $account->subdivision_id = $data->vatsim->subdivision->id;
 
         if (!$account->exists) {
             $account->role_id = 1;

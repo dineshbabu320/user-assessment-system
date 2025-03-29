@@ -1,66 +1,40 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+[System Name] - ATC Exam System
+Overview
+Welcome to the [System Name]—an advanced and intuitive Air Traffic Control (ATC) Exam System built for VATSIM’s SouthEast Asia Division. This system is designed to evaluate the knowledge, skills, and readiness of VATSIM members, helping them prepare for real-world air traffic control responsibilities.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Features
+Interactive Testing: Engage in a variety of ATC-related tests designed to simulate real-world challenges.
 
-## About Laravel
+Comprehensive Evaluation: Multiple test modules covering different aspects of ATC, including communication, radar procedures, flight sequencing, and more.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Instant Feedback: Receive immediate feedback after completing tests to understand areas of improvement.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Tracking Progress: Keep track of your exam scores and progress as you prepare for certification.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Easy-to-Use Interface: Designed with a clean and user-friendly interface for an optimal exam experience.
 
-## Learning Laravel
+Getting Started
+Login: To access the system, you must first log in with your VATSIM account credentials. This ensures the system tracks your progress and verifies your identity.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Select an Exam: Choose from a range of available exams designed for different proficiency levels.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Complete the Test: Answer questions and complete simulations based on real ATC scenarios.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Review Results: Once the exam is completed, review your results and gain insights into your performance.
 
-## Laravel Sponsors
+Prepare for Certification: After passing the necessary exams, you can proceed to certification, ensuring you’re ready to handle the demands of ATC.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+System Requirements
+Browser: This system is web-based, and it works best in modern browsers like Chrome, Firefox, or Edge.
 
-### Premium Partners
+Internet Connection: A stable internet connection is required to ensure the smooth functioning of the exam system.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Contact Information
+If you have any questions or issues with the system, feel free to reach out to the support team via the following methods:
 
-## Contributing
+Email: [Insert email here]
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+VATSIM Forum: [Insert link to forum or community page here]
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+License
+This system is developed for the SouthEast Asia Division of VATSIM and is intended for internal use only. Unauthorized access or distribution is prohibited.

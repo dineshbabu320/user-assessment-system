@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exam_tokens', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('tokens', function (Blueprint $table) {
+            $table->string('id')->primary();
             $table->string('user_cid');
             $table->foreign('user_cid')->references('cid')->on('users')->onDelete('cascade');
             $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');

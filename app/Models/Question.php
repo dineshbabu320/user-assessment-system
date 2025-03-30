@@ -13,6 +13,7 @@ class Question extends Model
     protected $fillable = [
         'exam_id',
         'question_text',
+        'question_type',
         'options',
         'correct_answer',
     ];
@@ -24,6 +25,11 @@ class Question extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class, 'exam_id');
+    }
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(Answer::class, 'question_id');
     }
 
     public function responses(): HasMany

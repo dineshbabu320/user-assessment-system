@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->string('answer_text'); // Only for multiple-choice & true/false
             $table->boolean('is_correct')->default(false); // True only for the correct answer
+            $table->timestamps(); // Add created_at and updated_at
+            $table->unique(['question_id', 'answer_text']); // Prevent duplicate answers for the same question
         });
     }
 

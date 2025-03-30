@@ -31,11 +31,18 @@ class StudentTokenController extends Controller
     {
         $request->validate([
             'user_cid' => 'required|exists:users,cid',
-            'exam_id' => 'required|exists:exams,id',
         ]);
 
         $user = User::where('cid', $request->user_cid)->first();
-        $exam = Exam::findOrFail($request->exam_id);
+        
+        $tokenId = $request->input('token_id');
+        $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'
+
+        // Ensure the exam_id exists in the exams table
+        $exam = Exam::where('name', $examId)->first();
+        if (!$exam) {
+            return redirect()->back()->with('error', "Invalid exam ID '{$examId}' in the token.");
+        }
         
         // Ensure subdivision directors can issue only within their subdivision
         if ($user->subdivision_id !== Auth::user()->subdivision_id) {
@@ -44,7 +51,7 @@ class StudentTokenController extends Controller
 
         // Create a token with a 14-day expiry
         Token::create([
-            'id' => Str::uuid(),
+            'id' => $tokenId,
             'user_cid' => $user->cid,
             'exam_id' => $exam->id,
             'issued_at' => now(),

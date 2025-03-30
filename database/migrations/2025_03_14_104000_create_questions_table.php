@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id(); // Auto-incrementing question ID
             $table->unsignedBigInteger('exam_id');
             $table->text('question_text');
-            $table->json('options'); // Store multiple choices
-            $table->string('correct_answer'); // Store correct option
+            $table->json('options')->nullable(); // Store multiple choices (optional)
             $table->timestamps();
 
             // Foreign key relationships

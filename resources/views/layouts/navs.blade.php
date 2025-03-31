@@ -122,5 +122,14 @@
             </a>
          </li>
       </ul>
+      <!-- Footer Section -->
+      <div class="absolute bottom-0 left-0 w-full p-4 bg-gray-100 dark:bg-gray-800">
+         <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+            Made by <a href="https://github.com/dineshbabu320" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Dinesh Babu</a>
+         </p>
+         <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
+            &copy; {{ date('Y') }} SEA-TEST. All rights reserved.
+         </p>
+      </div>
    </div>
 </aside>

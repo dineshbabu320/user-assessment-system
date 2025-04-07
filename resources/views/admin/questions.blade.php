@@ -8,9 +8,8 @@
     <div class="mb-6">
         <label for="exam-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Exam</label>
         <select id="exam-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
-            <option selected disabled>Select an exam</option>
             @foreach ($exams as $exam)
-                <option value="{{ $exam->id }}" {{ request('exam_id') == $exam->id ? 'selected' : '' }}>
+                <option value="{{ $exam->id }}" {{ request('exam_id', $exams->first()->id) == $exam->id ? 'selected' : '' }}>
                     {{ $exam->name }}
                 </option>
             @endforeach
@@ -18,13 +17,13 @@
     </div>
 
     <!-- Add Question Button -->
-    <a id="add-question-btn" href="#" class="hidden text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer">
+    <a id="add-question-btn" href="{{ route('admin.questions.create', ['exam_id' => $exams->first()->id ?? '']) }}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         Add Question
     </a>
 
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="flex fixed inset-0 justify-center items-center z-50">
-        <svg class="animate-spin h-10 w-10 text-blue-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin w-10 h-10 text-blue-600 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
@@ -53,22 +52,18 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Elements
         const examSelect = document.getElementById('exam-select');
         const addQuestionBtn = document.getElementById('add-question-btn');
         const questionsTableBody = document.getElementById('questions-table-body');
         const questionsTableContainer = document.getElementById('questions-table-container');
         const loadingSpinner = document.getElementById('loading-spinner');
 
-        // Function to load questions for a selected exam
         const loadQuestions = async (examId) => {
             try {
-                // Show the loading spinner
                 loadingSpinner.classList.remove('hidden');
 
-                // Enable the "Add Question" button and set its href
+                // Update the "Add Question" button link
                 addQuestionBtn.href = `/admin/questions/create/${examId}`;
-                addQuestionBtn.classList.remove('hidden');
 
                 // Fetch questions for the selected exam
                 const response = await fetch('{{ route('api.exams.questions') }}', {
@@ -87,12 +82,10 @@
                 console.error('Error loading questions:', error);
                 alert('Failed to load questions. Please try again.');
             } finally {
-                // Hide the loading spinner
                 loadingSpinner.classList.add('hidden');
             }
         };
 
-        // Function to render the questions table
         const renderQuestionsTable = (questions) => {
             questionsTableBody.innerHTML = questions.map(question => `
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
@@ -106,17 +99,16 @@
                 </tr>
             `).join('');
 
-            // Show the table container if there are questions
             questionsTableContainer.classList.remove('hidden');
         };
 
-        // Automatically load questions if exam_id is present in the query string
+        // Automatically load questions for the first exam or the selected exam
         const selectedExamId = examSelect.value;
         if (selectedExamId) {
             loadQuestions(selectedExamId);
         }
 
-        // Load questions for selected exam
+        // Load questions when the exam is changed
         examSelect.addEventListener('change', () => {
             const examId = examSelect.value;
             loadQuestions(examId);

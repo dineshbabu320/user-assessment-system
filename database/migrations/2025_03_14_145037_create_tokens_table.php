@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tokens', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id('token_instance_id'); // Unique identifier for each token issuance
+            $table->string('id'); // Token name (e.g., READY-S1)
             $table->string('user_cid');
             $table->foreign('user_cid')->references('cid')->on('users')->onDelete('cascade');
-            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->unsignedBigInteger('exam_id');
+            $table->foreign('exam_id')->references('id')->on('exams')->onDelete('cascade');
             $table->timestamp('issued_at')->useCurrent();
-            $table->timestamp('expires_at'); // Set to 14 days from issued_at
+            $table->timestamp('expires_at')->nullable();
         });
     }
 

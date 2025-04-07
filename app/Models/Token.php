@@ -9,9 +9,9 @@ class Token extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $primaryKey = 'token_instance_id'; // Use token_instance_id as the primary key
+    public $incrementing = true; // Auto-incrementing primary key
+    protected $keyType = 'int'; // Primary key is an integer
 
     protected $fillable = [
         'id',
@@ -23,7 +23,7 @@ class Token extends Model
 
     protected $casts = [
         'issued_at' => 'datetime',
-        'expires_at' => 'datetime', // Cast expires_at to a datetime object
+        'expires_at' => 'datetime',
     ];
 
     public $timestamps = false;

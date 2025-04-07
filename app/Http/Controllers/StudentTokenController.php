@@ -46,7 +46,7 @@ class StudentTokenController extends Controller
         if (!$exam) {
             return redirect()->back()->with('error', "Invalid exam ID '{$examId}' in the token.");
         }
-        
+
         // Ensure subdivision directors can issue only within their subdivision
         if ($user->subdivision_id !== Auth::user()->subdivision_id) {
             return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
@@ -70,6 +70,7 @@ class StudentTokenController extends Controller
                 'rating' => $rating, // Store the rating
             ]);
 
+            // Notify admin via email
             Mail::to("hvdineshbabu@gmail.com")->send(new RatingUpgradeNotification($token));
         }
 

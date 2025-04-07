@@ -22,7 +22,7 @@
                 </thead>
                 <tbody>
                     @foreach ($requests as $request)
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $request->user_cid }}</td>
                             <td class="px-6 py-4">{{ $request->rating }}</td>
                             <td class="px-6 py-4">
@@ -36,7 +36,7 @@
                                 @if (!$request->completed)
                                     <form method="POST" action="{{ route('admin.markRatingUpgradeCompleted', $request->id) }}">
                                         @csrf
-                                        <button type="submit" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                        <button type="submit" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 cursor-pointer">
                                             Mark as Completed
                                         </button>
                                     </form>

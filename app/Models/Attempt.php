@@ -3,16 +3,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attempt extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+
+    public $timestamps=false;
 
     protected $fillable = [
         'id',
@@ -21,7 +20,13 @@ class Attempt extends Model
         'attempt_number',
         'attempted_at',
         'status',
+        'score',
         'cooldown_until',
+    ];
+
+    protected $casts = [
+        'attempted_at' => 'datetime',
+        'cooldown_until' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -32,5 +37,10 @@ class Attempt extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class, 'exam_id');
+    }
+
+    public function responses()
+    {
+        return $this->hasMany(Response::class, 'attempt_id');
     }
 }

@@ -108,6 +108,7 @@ class LoginController extends Controller
         $account->email = $data->personal->email;
         $account->atc_rating = $data->vatsim->rating->id;
         $account->subdivision_id = $data->vatsim->subdivision->id;
+        $account->subdivision_name = $data->vatsim->subdivision->name;
 
         if (!$account->exists) {
             $account->role_id = 1;

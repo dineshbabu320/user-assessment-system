@@ -1,0 +1,100 @@
+@extends('layouts.app')
+
+@section('content')
+<div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4">
+    <!-- Header Section -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Student History</h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Detailed history of the student, including tokens and exam attempts.</p>
+    </div>
+
+    <!-- Student Info Card -->
+    <div class="mb-6 p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ $student->name }}</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400">CID: {{ $student->cid }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Email: {{ $student->email }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Subdivision: {{ $student->subdivision_name ?? 'N/A' }}</p>
+    </div>
+
+    <!-- Tokens Section -->
+    <div class="mb-6">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tokens</h3>
+        @if ($student->tokens->count() > 0)
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Token ID</th>
+                            <th scope="col" class="px-6 py-3">Issued Date</th>
+                            <th scope="col" class="px-6 py-3">Expiry Date</th>
+                            <th scope="col" class="px-6 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($student->tokens as $token)
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <td class="px-6 py-4">{{ $token->id }}</td>
+                                <td class="px-6 py-4">{{ $token->issued_at->format('Y-m-d') }}</td>
+                                <td class="px-6 py-4">{{ $token->expires_at->format('Y-m-d') }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($token->expires_at->isFuture())
+                                        <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Active</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Expired</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
+        @endif
+    </div>
+
+    <!-- Exam Attempts Section -->
+    <div class="mb-6">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Exam Attempts</h3>
+        @if ($student->attempts->count() > 0)
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Exam Name</th>
+                            <th scope="col" class="px-6 py-3">Score</th>
+                            <th scope="col" class="px-6 py-3">Status</th>
+                            <th scope="col" class="px-6 py-3">Attempt Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($student->attempts as $attempt)
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <td class="px-6 py-4">{{ $attempt->exam->name }}</td>
+                                <td class="px-6 py-4">{{ $attempt->score ?? 'N/A' }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($attempt->status === 'passed')
+                                        <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Passed</span>
+                                    @elseif ($attempt->status === 'failed')
+                                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Failed</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded dark:bg-yellow-900 dark:text-yellow-300">Waiting for Evaluation</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>
+        @endif
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-6">
+        <a href="{{ route('students.search') }}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Back to Search</a>
+    </div>
+</div>
+@endsection

@@ -22,6 +22,10 @@ class User extends Authenticatable
         'subdivision_id',
     ];
 
+    public function tokens() {
+        return $this->hasMany(Token::class, 'user_cid');
+    }
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
@@ -30,6 +34,16 @@ class User extends Authenticatable
     public function subdivision(): BelongsTo
     {
         return $this->belongsTo(Subdivision::class, 'subdivision_id');
+    }
+
+    public function attempts()
+    {
+        return $this->hasMany(Attempt::class, 'user_cid');
+    }
+
+    public function responses()
+    {
+        return $this->hasMany(Response::class, 'user_cid', 'cid');
     }
 
     // Role Helper Methods
@@ -41,5 +55,10 @@ class User extends Authenticatable
     public function isSubdivisionDirector(): bool
     {
         return $this->role_id == 2;
+    }
+
+    public function roleAboveStudent(): bool
+    {
+        return $this->role_id > 1;
     }
 }

@@ -62,7 +62,6 @@
                 <tr>
                     <th scope="col" class="px-6 py-3">CID</th>
                     <th scope="col" class="px-6 py-3">Name</th>
-                    <th scope="col" class="px-6 py-3">Email</th>
                     <th scope="col" class="px-6 py-3">Subdivision</th>
                     <th scope="col" class="px-6 py-3">Action</th>
                 </tr>
@@ -75,9 +74,6 @@
                     </th>
                     <td class="px-6 py-4">
                         {{ $student->name }}
-                    </td>
-                    <td class="px-6 py-4">
-                        {{ $student->email }}
                     </td>
                     <td class="px-6 py-4">
                         {{ $student->subdivision_id }}

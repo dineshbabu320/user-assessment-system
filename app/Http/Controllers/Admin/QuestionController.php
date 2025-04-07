@@ -104,7 +104,8 @@ class QuestionController extends Controller
             }
         }
 
-        return redirect()->route('admin.questions.index')->with('success', 'Question updated successfully!');
+        return redirect()->route('admin.questions.index', ['exam_id' => $request->exam_id])
+            ->with('success', 'Question updated successfully!');
     }
 
     public function store(Request $request)
@@ -150,6 +151,7 @@ class QuestionController extends Controller
             }
         }
 
-        return redirect()->route('admin.questions.index')->with('success', 'Question added successfully!');
+        return redirect()->route('admin.questions.index', ['exam_id' => $request->exam_id])
+            ->with('success', 'Question added successfully!');
     }
 }

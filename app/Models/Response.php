@@ -13,11 +13,15 @@ class Response extends Model
         'id',
         'user_cid',
         'question_id',
+        'attempt_id',
         'response_text',
         'status',
+        'comments',
         'evaluated_by',
         'evaluated_at',
     ];
+
+    public $timestamps=false;
 
     protected $casts = [
         'evaluated_at' => 'datetime',
@@ -36,5 +40,10 @@ class Response extends Model
     public function evaluator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'evaluated_by', 'cid');
+    }
+
+    public function attempt(): BelongsTo
+    {
+        return $this->belongsTo(Attempt::class, 'attempt_id');
     }
 }

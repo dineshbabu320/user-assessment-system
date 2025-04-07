@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\Exam;
+use App\Models\RatingUpgradeRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RatingUpgradeNotification;
 
 class StudentTokenController extends Controller
 {
@@ -31,6 +33,7 @@ class StudentTokenController extends Controller
     {
         $request->validate([
             'user_cid' => 'required|exists:users,cid',
+            'token_id' => 'required|string',
         ]);
 
         $user = User::where('cid', $request->user_cid)->first();
@@ -49,14 +52,26 @@ class StudentTokenController extends Controller
             return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
         }
 
-        // Create a token with a 14-day expiry
-        Token::create([
+        $token = Token::create([
             'id' => $tokenId,
             'user_cid' => $user->cid,
             'exam_id' => $exam->id,
             'issued_at' => now(),
             'expires_at' => now()->addDays(14),
         ]);
+
+        // If the token is REC type, create a rating upgrade request
+        if (str_starts_with($request->token_id, 'REC')) {
+            $rating = substr($request->token_id, 4); // Extract the rating name after 'REC-'
+
+            RatingUpgradeRequest::create([
+                'user_cid' => $request->user_cid,
+                'token_id' => $request->token_id,
+                'rating' => $rating, // Store the rating
+            ]);
+
+            Mail::to("hvdineshbabu@gmail.com")->send(new RatingUpgradeNotification($token));
+        }
 
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");
     }

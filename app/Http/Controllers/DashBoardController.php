@@ -30,12 +30,15 @@ class DashboardController extends Controller
 
         $user_rating = $ratings[$user->atc_rating] ?? ['short' => 'UNK', 'long' => 'Unknown'];
 
+        $subdivisionName=$user->subdivision_name;
+        $subdivisionID=$user->subdivision_id;
+
         // Get user's token status
         $active_token = Token::where('user_cid', $user->cid)->where('expires_at', '>', now())->first();
 
         // Get user's exam attempts
         $exam_attempts = Attempt::where('user_cid', $user->cid)->orderBy('attempted_at', 'desc')->get();
 
-        return view('dashboard', compact('user_rating', 'active_token', 'exam_attempts'));
+        return view('dashboard', compact('user_rating', 'active_token', 'exam_attempts', 'subdivisionName', 'subdivisionID'));
     }
 }

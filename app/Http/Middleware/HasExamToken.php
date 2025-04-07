@@ -5,16 +5,64 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Exam;
+use App\Models\Attempt;
 
 class HasExamToken
 {
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
-        $examId = $request->route('exam');
 
-        // Check if the user has a token for the requested exam
-        if (!$user->tokens()->where('exam_id', $examId)->exists()) {
+        // Check if the route contains an attemptId
+        $attemptId = $request->route('attemptId');
+        if ($attemptId) {
+            // Fetch the attempt
+            $attempt = Attempt::where('id', $attemptId)
+                ->where('user_cid', $user->cid)
+                ->first();
+
+            if (!$attempt) {
+                return redirect()->route('dashboard')->with('error', 'The requested attempt does not exist.');
+            }
+
+            // Fetch the associated exam
+            $exam = $attempt->exam;
+
+            if (!$exam) {
+                return redirect()->route('dashboard')->with('error', 'The requested exam does not exist.');
+            }
+
+            // Check if the user has a valid token for the exam
+            $hasValidToken = $user->tokens()
+                ->where('exam_id', $exam->id)
+                ->where('expires_at', '>', now())
+                ->exists();
+
+            if (!$hasValidToken) {
+                return redirect()->route('dashboard')->with('error', 'You are not authorized for this exam.');
+            }
+
+            return $next($request);
+        }
+
+        // If no attemptId, fallback to the existing examName logic
+        $examName = $request->route('examName'); // Get the exam name from the route
+
+        // Fetch the exam by name
+        $exam = Exam::where('name', $examName)->first();
+
+        if (!$exam) {
+            return redirect()->route('dashboard')->with('error', 'The requested exam does not exist.');
+        }
+
+        // Check if the user has a valid token for the exam
+        $hasValidToken = $user->tokens()
+            ->where('exam_id', $exam->id)
+            ->where('expires_at', '>', now())
+            ->exists();
+
+        if (!$hasValidToken) {
             return redirect()->route('dashboard')->with('error', 'You are not authorized for this exam.');
         }
 

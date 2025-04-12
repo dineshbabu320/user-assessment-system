@@ -51,7 +51,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/questions/{id}/edit', [QuestionController::class, 'edit'])->name('admin.questions.edit');
         Route::put('/admin/questions/{id}', [QuestionController::class, 'update'])->name('admin.questions.update');
         Route::post('/api/exams/questions', [QuestionController::class, 'getQuestions'])->name('api.exams.questions');
-        Route::post('/api/questions/get', [QuestionController::class, 'getQuestion'])->name('api.questions.get');
         Route::get('/admin/rating-upgrade-requests', [RatingUpgradeController::class, 'index'])->name('admin.ratingUpgradeRequests');
         Route::post('/admin/rating-upgrade-requests/{id}/complete', [RatingUpgradeController::class, 'markAsCompleted'])->name('admin.markRatingUpgradeCompleted');
     });

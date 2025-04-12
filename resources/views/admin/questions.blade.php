@@ -46,6 +46,7 @@
             </tbody>
         </table>
     </div>
+    <div id="pagination-container" class="mt-4"></div>
 </div>
 @endsection
 
@@ -58,26 +59,26 @@
         const questionsTableContainer = document.getElementById('questions-table-container');
         const loadingSpinner = document.getElementById('loading-spinner');
 
-        const loadQuestions = async (examId) => {
+        const loadQuestions = async (examId, page = 1) => {
             try {
                 loadingSpinner.classList.remove('hidden');
 
                 // Update the "Add Question" button link
                 addQuestionBtn.href = `/admin/questions/create/${examId}`;
 
-                // Fetch questions for the selected exam
+                // Fetch questions for the selected exam with pagination
                 const response = await fetch('{{ route('api.exams.questions') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ exam_id: examId }),
+                    body: JSON.stringify({ exam_id: examId, page: page }),
                 });
 
                 if (!response.ok) throw new Error('Failed to fetch questions');
-                const questions = await response.json();
-                renderQuestionsTable(questions);
+                const data = await response.json();
+                renderQuestionsTable(data.questions, data.pagination);
             } catch (error) {
                 console.error('Error loading questions:', error);
                 alert('Failed to load questions. Please try again.');
@@ -86,7 +87,8 @@
             }
         };
 
-        const renderQuestionsTable = (questions) => {
+        const renderQuestionsTable = (questions, paginationHtml) => {
+            // Render the questions in the table
             questionsTableBody.innerHTML = questions.map(question => `
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4">${question.question_text}</td>
@@ -98,6 +100,20 @@
                     </td>
                 </tr>
             `).join('');
+
+            // Render pagination links
+            const paginationContainer = document.getElementById('pagination-container');
+            paginationContainer.innerHTML = paginationHtml;
+
+            // Add event listeners to pagination links
+            paginationContainer.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const url = new URL(link.href);
+                    const page = url.searchParams.get('page');
+                    loadQuestions(examSelect.value, page);
+                });
+            });
 
             questionsTableContainer.classList.remove('hidden');
         };

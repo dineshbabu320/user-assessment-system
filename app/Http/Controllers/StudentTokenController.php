@@ -20,11 +20,12 @@ class StudentTokenController extends Controller
         $query = $request->input('query');
 
         // Fetch students based on name and limit by subdivision if the user is a Subdivision Director
-        $students = User::where('name', 'LIKE', "%{$query}%")
+        $students = User::select('cid', 'name', 'email', 'subdivision_id') // Specify the columns to retrieve
+            ->where('name', 'LIKE', "%{$query}%")
             ->when(Auth::user()->role->name === 'Subdivision Director', function ($q) {
                 $q->where('subdivision_id', Auth::user()->subdivision_id);
             })
-            ->get(['cid', 'name', 'email', 'subdivision_id']);
+            ->paginate(10); // Paginate results (10 per page)
 
         return view('students.search', compact('students'));
     }
@@ -46,9 +47,9 @@ class StudentTokenController extends Controller
             ->orderBy('cooldown_until', 'desc') // Get the latest cooldown
             ->first();
 
-        if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
-            return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
-        }
+        // if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
+        //     return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
+        // }
 
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'

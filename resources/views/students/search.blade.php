@@ -129,6 +129,9 @@
             </tbody>
         </table>
     </div>
+    <div class="mt-4">
+        {{ $students->links('pagination::tailwind') }}
+    </div>
     @else
         <p class="text-gray-500 dark:text-gray-400">No students found. Try searching with a different name.</p>
     @endif

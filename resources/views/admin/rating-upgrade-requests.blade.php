@@ -47,6 +47,9 @@
                 </tbody>
             </table>
         </div>
+        <div class="mt-4">
+            {{ $requests->links('pagination::tailwind') }}
+        </div>
     @else
         <!-- Empty State -->
         <div class="flex flex-col items-center justify-center mt-10">

@@ -31,7 +31,10 @@ class QuestionController extends Controller
 
         $exam = Exam::findOrFail($request->exam_id);
 
-        $questions = $exam->questions()->with('answers')->get()->map(function ($question) {
+        // Use paginate instead of get
+        $questions = $exam->questions()->with('answers')->paginate(10); // 10 questions per page
+
+        $questions->getCollection()->transform(function ($question) {
             return [
                 'id' => $question->id,
                 'question_text' => $question->question_text,
@@ -41,9 +44,10 @@ class QuestionController extends Controller
             ];
         });
 
-        \Log::channel('custom')->info('Questions fetched:', $questions->toArray());
-
-        return response()->json($questions);
+        return response()->json([
+            'questions' => $questions->items(),
+            'pagination' => $questions->links('pagination::tailwind')->render(), // Render Tailwind pagination links
+        ]);
     }
 
     public function edit($id)

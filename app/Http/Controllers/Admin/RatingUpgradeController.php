@@ -9,7 +9,7 @@ class RatingUpgradeController extends Controller
 {
     public function index()
     {
-        $requests = RatingUpgradeRequest::all();
+        $requests = RatingUpgradeRequest::paginate(10);
         return view('admin.rating-upgrade-requests', compact('requests'));
     }
 

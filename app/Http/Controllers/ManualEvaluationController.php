@@ -20,7 +20,7 @@ class ManualEvaluationController extends Controller
                 });
         })->withCount(['responses as pending_evaluations' => function ($query) {
             $query->where('status', 'pending');
-        }])->get();
+        }])->paginate(10);
 
         return view('students.manual-evaluation-list', compact('students'));
     }

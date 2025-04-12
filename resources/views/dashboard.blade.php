@@ -153,6 +153,10 @@
             </tbody>
         </table>
     </div>
+    
+    <div class="mt-4">
+        {{ $exam_attempts->links('pagination::tailwind') }}
+    </div>
 </div>
 
 @endsection

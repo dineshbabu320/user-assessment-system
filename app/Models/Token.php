@@ -19,6 +19,7 @@ class Token extends Model
         'exam_id',
         'issued_at',
         'expires_at',
+        'status'
     ];
 
     protected $casts = [

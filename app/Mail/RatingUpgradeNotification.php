@@ -29,7 +29,7 @@ class RatingUpgradeNotification extends Mailable
      */
     public function build()
     {
-        return $this->subject('Rating Upgrade Notification')
+        return $this->subject('Rating Upgrade Request')
                     ->view('emails.rating_upgrade_notification')
                     ->with(['token' => $this->token]);
     }

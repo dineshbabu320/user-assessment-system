@@ -55,12 +55,16 @@
         .button {
             display: inline-block;
             background-color: #4f46e5;
-            color: #ffffff;
-            text-decoration: none;
+            color: #ffffff !important; /* Ensure text color is white */
             padding: 10px 20px;
             border-radius: 5px;
             font-size: 16px;
             margin-top: 20px;
+            text-decoration: none; /* Remove underline */
+        }
+        .button a {
+            color: inherit !important; /* Inherit color from parent */
+            text-decoration: none; /* Remove underline */
         }
         .button:hover {
             background-color: #3b3abf;
@@ -76,11 +80,12 @@
 
         <!-- Body -->
         <div class="email-body">
-            <p>Dear <span class="highlight">{{ $token->user->name }}</span>,</p>
-            <p>We are pleased to inform you that a <span class="highlight">Rating Upgrade Request</span> has been initiated for you.</p>
-            <p>The requested rating is: <span class="highlight">{{ substr($token->id, 4) }}</span>.</p>
-            <p>Please wait while the request is being processed. You will be notified once the upgrade is completed.</p>
-            <p>If you have any questions, feel free to contact your subdivision director or admin.</p>
+            <p>Dear Admin,</p>
+            <p>A <span class="highlight">Rating Upgrade Request</span> has been initiated for the following user:</p>
+            <p><strong>Name:</strong> <span class="highlight">{{ $token->user->name }}</span></p>
+            <p><strong>CID:</strong> <span class="highlight">{{ $token->user->cid }}</span></p>
+            <p><strong>Requested Rating:</strong> <span class="highlight">{{ substr($token->id, 4) }}</span></p>
+            <p>Please log in to the system to review and process this request.</p>
             <a href="{{ url('/') }}" class="button">Visit Dashboard</a>
         </div>
 

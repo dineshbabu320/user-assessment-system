@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4">
-    <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Exam Instructions</h1>
+<div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4 text-gray-900 dark:text-white">
+    <h1 class="text-2xl font-bold mb-6">Exam Instructions</h1>
     <p class="mb-4">Please ensure the following before starting the exam:</p>
     <ul class="list-disc pl-6 mb-6">
         <li>Have a continuous internet connection.</li>

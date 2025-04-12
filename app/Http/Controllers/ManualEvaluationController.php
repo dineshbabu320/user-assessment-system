@@ -76,6 +76,7 @@ class ManualEvaluationController extends Controller
         $attempt->update([
             'status' => $status,
             'score' => $totalScore,
+            'cooldown_until' => $status === 'failed' ? now()->addDays($attempt->attempt_number * 7) : null,
         ]);
 
         return redirect()->route('student.manualEvaluation')->with('success', 'All evaluations submitted successfully.');

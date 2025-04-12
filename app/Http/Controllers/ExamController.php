@@ -10,6 +10,24 @@ use Illuminate\Http\Request;
 class ExamController extends Controller
 {
     /**
+     * My Exams section
+     */
+    public function myExams()
+    {
+        $user = auth()->user();
+
+        // Fetch active tokens for the user
+        $active_tokens = Token::where('user_cid', $user->cid)
+            ->where('status', 'active')
+            ->where('expires_at', '>', now())
+            ->where('id','LIKE','READY-%')
+            ->with('exam') // Assuming a relationship exists between Token and Exam
+            ->get();
+
+        return view('exam.my-exams', compact('active_tokens'));
+    }
+
+    /**
      * Show instructions before starting the exam.
      */
     public function instructions($examName)
@@ -45,6 +63,7 @@ class ExamController extends Controller
         $token = Token::where('user_cid', auth()->user()->cid)
             ->where('id', 'READY-' . $examName)
             ->where('expires_at', '>', now())
+            ->where('status', 'active')
             ->firstOrFail();
 
         $exam = $token->exam()->with('questions.answers')->firstOrFail();
@@ -160,6 +179,9 @@ class ExamController extends Controller
             'score' => $totalScore,
         ]);
 
+        // Mark the token as used
+        $token->update(['status' => 'used']);
+
         return redirect()->route('exam.review', $attemptId)->with('success', 'Exam submitted successfully.');
     }
 
@@ -191,7 +213,7 @@ class ExamController extends Controller
 
         // Calculate total score
         $maxScore = $exam->questions->count() * 1; // Assuming each question is worth 1 point
-        $totalScore = $responses->where('status', 'correct')->count();
+        $totalScore = $attempt->score;
 
         return view('exam.review', [
             'exam' => $exam,

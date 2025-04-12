@@ -10,6 +10,7 @@ use App\Models\RatingUpgradeRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RatingUpgradeNotification;
+use App\Models\Attempt; // Add this import if not already present
 
 class StudentTokenController extends Controller
 {
@@ -38,6 +39,17 @@ class StudentTokenController extends Controller
 
         $user = User::where('cid', $request->user_cid)->first();
         
+        // Check for cooldown period in the attempts table
+        $cooldown = Attempt::where('user_cid', $request->user_cid)
+            ->where('status', 'failed') // Assuming 'failed' indicates a failed attempt
+            ->whereNotNull('cooldown_until') // Ensure cooldown_until is set
+            ->orderBy('cooldown_until', 'desc') // Get the latest cooldown
+            ->first();
+
+        if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
+            return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
+        }
+
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'
 
@@ -48,8 +60,10 @@ class StudentTokenController extends Controller
         }
 
         // Ensure subdivision directors can issue only within their subdivision
-        if ($user->subdivision_id !== Auth::user()->subdivision_id) {
-            return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
+        if ($user->roleAboveStudent() && $user->isSubdivisionDirector()) {
+            if ($user->subdivision_id !== Auth::user()->subdivision_id) {
+                return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
+            }
         }
 
         $token = Token::create([

@@ -39,7 +39,7 @@
                 @endif
             </div>
         @endforeach
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Submit Exam</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer">Submit Exam</button>
     </form>
 </div>
 @endsection

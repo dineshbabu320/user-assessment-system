@@ -29,7 +29,7 @@
             <div class="ms-3 text-sm font-medium">
                 {{ session('error') }}
             </div>
-            <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-green-50 text-red-800 rounded-lg focus:ring-2 focus:ring-red-400 p-1.5 hover:bg-red-200 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-gray-700" data-dismiss-target="#alert-3" aria-label="Close">
+            <button type="button" class="cursor-pointer ms-auto -mx-1.5 -my-1.5 bg-green-50 text-red-800 rounded-lg focus:ring-2 focus:ring-red-400 p-1.5 hover:bg-red-200 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-gray-700" data-dismiss-target="#alert-3" aria-label="Close">
                 <span class="sr-only">Close</span>
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -58,7 +58,7 @@
     @if(isset($students) && count($students) > 0)
     <div class="relative overflow-x-auto">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-blue-600 dark:text-white">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
                 <tr>
                     <th scope="col" class="px-6 py-3">CID</th>
                     <th scope="col" class="px-6 py-3">Name</th>
@@ -72,15 +72,15 @@
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         {{ $student->cid }}
                     </th>
-                    <td class="px-6 py-4">
-                        {{ $student->name }}
+                    <td class="px-6 py-4 font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                        <a href="{{ route('student.studentHistory', $student->cid) }}">{{ $student->name }}</a>
                     </td>
                     <td class="px-6 py-4">
                         {{ $student->subdivision_id }}
                     </td>
                     <td class="px-6 py-4">
                         <!-- Modal Toggle Button -->
-                        <button data-modal-target="issue-token-modal-{{ $student->cid }}" data-modal-toggle="issue-token-modal-{{ $student->cid }}" class="bg-green-500 text-white px-4 py-2 rounded-lg">Issue Token</button>
+                        <button data-modal-target="issue-token-modal-{{ $student->cid }}" data-modal-toggle="issue-token-modal-{{ $student->cid }}" class="bg-green-500 text-white px-4 py-2 rounded-lg cursor-pointer">Issue Token</button>
 
                         <!-- Modal -->
                         <div id="issue-token-modal-{{ $student->cid }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -92,7 +92,7 @@
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                             Issue Token for {{ $student->name }}
                                         </h3>
-                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="issue-token-modal-{{ $student->cid }}">
+                                        <button type="button" class="cursor-pointer text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="issue-token-modal-{{ $student->cid }}">
                                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                             </svg>
@@ -116,7 +116,7 @@
                                                 <option value="REC-I1">REC-I1</option>
                                             </select>
                                         </div>
-                                        <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                        <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer">
                                             Issue Token
                                         </button>
                                     </form>

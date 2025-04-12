@@ -111,7 +111,17 @@
         // Load questions when the exam is changed
         examSelect.addEventListener('change', () => {
             const examId = examSelect.value;
+            history.pushState({ examId }, '', `?exam_id=${examId}`);
             loadQuestions(examId);
+        });
+
+        // Handle back/forward navigation
+        window.addEventListener('popstate', (event) => {
+            const state = event.state;
+            if (state && state.examId) {
+                examSelect.value = state.examId;
+                loadQuestions(state.examId);
+            }
         });
     });
 </script>

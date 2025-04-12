@@ -1,8 +1,8 @@
-# **[System Name] - ATC Exam System**
+# **SEA-TEST - ATC Exam System**
 
 ## Overview
 
-Welcome to the **[System Name]**—an advanced and intuitive **Air Traffic Control (ATC) Exam System** built for **VATSIM’s SouthEast Asia Division**. This system is designed to evaluate the knowledge, skills, and readiness of VATSIM members, helping them prepare for real-world air traffic control responsibilities.
+Welcome to the **SEA-TEST**—an advanced and intuitive **Air Traffic Control (ATC) Exam System** built for **VATSIM’s SouthEast Asia Division**. This system is designed to evaluate the knowledge, skills, and readiness of VATSIM members, helping them prepare for real-world air traffic control responsibilities.
 
 ## Features
 
@@ -29,8 +29,7 @@ Welcome to the **[System Name]**—an advanced and intuitive **Air Traffic Contr
 
 If you have any questions or issues with the system, feel free to reach out to the support team via the following methods:
 
-- **Email**: [Insert email here]
-- **VATSIM Forum**: [Insert link to forum or community page here]
+- **Email**: hvdineshbabu@gmail.com
 
 ## License
 

@@ -41,6 +41,7 @@ class QuestionController extends Controller
                 'question_type' => $question->question_type,
                 'options' => $question->options ? json_decode($question->options, true) : [],
                 'correct_answers' => $question->answers->where('is_correct', true)->pluck('answer_text')->toArray(),
+                'points' => $question->points,
             ];
         });
 
@@ -90,6 +91,7 @@ class QuestionController extends Controller
             'question_text' => $request->question_text,
             'question_type' => $request->question_type,
             'options' => $options ? json_encode($options) : null,
+            'points' => $request->points, // Update points
         ]);
 
         \Log::channel('custom')->info('Question updated:', $question->toArray());
@@ -122,6 +124,7 @@ class QuestionController extends Controller
             'question_type' => 'required|in:mcq,single,text',
             'options' => 'required_if:question_type,mcq,single|nullable|string',
             'correct_answers' => 'required_if:question_type,mcq,single|nullable|string',
+            'points' => 'required|integer|min:1', // Validate points
         ]);
 
         $options = $request->question_type !== 'text' && $request->options
@@ -140,6 +143,7 @@ class QuestionController extends Controller
             'question_text' => $request->question_text,
             'question_type' => $request->question_type,
             'options' => $options ? json_encode($options) : null,
+            'points' => $request->points, // Save points
         ]);
 
         \Log::channel('custom')->info('Question created:', $question->toArray());

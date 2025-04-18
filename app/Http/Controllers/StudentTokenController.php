@@ -10,6 +10,7 @@ use App\Models\RatingUpgradeRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RatingUpgradeNotification;
+use App\Mail\TokenIssuedMail;
 use App\Models\Attempt; // Add this import if not already present
 
 class StudentTokenController extends Controller
@@ -86,7 +87,10 @@ class StudentTokenController extends Controller
             ]);
 
             // Notify admin via email
-            Mail::to("hvdineshbabu@gmail.com")->send(new RatingUpgradeNotification($token));
+            Mail::to("hvdineshbabu@gmail.com")->queue(new RatingUpgradeNotification($token));
+        }
+        else {
+            Mail::to("hvdineshbabu@gmail.com")->queue(new TokenIssuedMail($token));
         }
 
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");

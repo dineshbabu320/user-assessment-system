@@ -38,6 +38,7 @@
                     <th scope="col" class="px-6 py-3">Type</th>
                     <th scope="col" class="px-6 py-3">Options</th>
                     <th scope="col" class="px-6 py-3">Correct Answers</th>
+                    <th scope="col" class="px-6 py-3">Points</th>
                     <th scope="col" class="px-6 py-3">Actions</th>
                 </tr>
             </thead>
@@ -95,6 +96,7 @@
                     <td class="px-6 py-4">${question.question_type || 'N/A'}</td>
                     <td class="px-6 py-4">${question.options?.join(', ') || 'N/A'}</td>
                     <td class="px-6 py-4">${question.correct_answers?.join(', ') || 'N/A'}</td>
+                    <td class="px-6 py-4">${question.points}</td>
                     <td class="px-6 py-4">
                         <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>
                     </td>

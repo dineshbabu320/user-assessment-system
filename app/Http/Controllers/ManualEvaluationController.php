@@ -65,8 +65,11 @@ class ManualEvaluationController extends Controller
         $attempt = $response->attempt;
         $responses = $attempt->responses;
 
-        $totalScore = $responses->where('status', 'correct')->count();
-        $maxScore = $attempt->exam->questions->count();
+        $totalScore = $responses->where('status', 'correct')->sum(function ($response) {
+            return $response->question->points;
+        });
+
+        $maxScore = $attempt->exam->questions->sum('points');
         $hasPendingEvaluation = $responses->where('status', 'pending')->isNotEmpty();
 
         $status = $hasPendingEvaluation

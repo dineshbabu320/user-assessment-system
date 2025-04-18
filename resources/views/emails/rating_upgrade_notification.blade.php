@@ -3,83 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rating Upgrade Notification</title>
+    <title>Rating Upgrade Request</title>
     <style>
+        /* General Styles */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
             margin: 0;
             padding: 0;
-            color: #333;
+            background-color: #f9fafb; /* Light background for light mode */
+            color: #333333; /* Dark text for readability */
         }
-        .email-container {
+        .container {
             max-width: 600px;
             margin: 20px auto;
-            background-color: #ffffff;
+            background-color: #ffffff; /* White background for light mode */
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb; /* Light border for structure */
         }
-        .email-header {
-            background-color: #4f46e5;
-            color: #ffffff;
-            text-align: center;
+        .header {
+            background-color: #0ea5e9; /* Cyan color */
             padding: 20px;
+            text-align: center;
         }
-        .email-header h1 {
+        .header h1 {
             margin: 0;
             font-size: 24px;
+            color: #ffffff; /* White text for contrast */
         }
-        .email-body {
+        .content {
             padding: 20px;
         }
-        .email-body p {
-            margin: 0 0 15px;
+        .content p {
+            margin: 10px 0;
             line-height: 1.6;
-        }
-        .email-body .highlight {
-            color: #4f46e5;
-            font-weight: bold;
-        }
-        .email-footer {
-            text-align: center;
-            padding: 15px;
-            background-color: #f4f4f9;
-            font-size: 14px;
-            color: #777;
-        }
-        .email-footer a {
-            color: #4f46e5;
-            text-decoration: none;
+            color: #333333; /* Dark text for readability */
         }
         .button {
             display: inline-block;
-            background-color: #4f46e5;
-            color: #ffffff !important; /* Ensure text color is white */
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
             margin-top: 20px;
-            text-decoration: none; /* Remove underline */
-        }
-        .button a {
-            color: inherit !important; /* Inherit color from parent */
-            text-decoration: none; /* Remove underline */
+            padding: 10px 20px;
+            background-color: #0ea5e9; /* Cyan color */
+            color: #ffffff !important; /* White text */
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
         }
         .button:hover {
-            background-color: #3b3abf;
+            background-color: #0284c7; /* Darker cyan on hover */
+        }
+        .footer {
+            background-color: #f3f4f6; /* Light gray background for footer */
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280; /* Gray text */
+        }
+
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a; /* Dark background for dark mode */
+                color: #ffffff; /* Light text for readability */
+            }
+            .container {
+                background-color: #1e293b; /* Darker background for dark mode */
+                border: 1px solid #334155; /* Dark border for structure */
+            }
+            .content p {
+                color: #e2e8f0; /* Light text for readability */
+            }
+            .footer {
+                background-color: #0f172a; /* Dark footer background */
+                color: #94a3b8; /* Light gray text */
+            }
         }
     </style>
 </head>
 <body>
-    <div class="email-container">
-        <!-- Header -->
-        <div class="email-header">
-            <h1>Rating Upgrade Notification</h1>
+    <div class="container">
+        <div class="header">
+            <h1>Requested for upgrade</h1>
         </div>
-
-        <!-- Body -->
-        <div class="email-body">
+        <div class="content">
             <p>Dear Admin,</p>
             <p>A <span class="highlight">Rating Upgrade Request</span> has been initiated for the following user:</p>
             <p><strong>Name:</strong> <span class="highlight">{{ $token->user->name }}</span></p>
@@ -88,11 +96,8 @@
             <p>Please log in to the system to review and process this request.</p>
             <a href="{{ url('/') }}" class="button">Visit Dashboard</a>
         </div>
-
-        <!-- Footer -->
-        <div class="email-footer">
-            <p>Thank you for your dedication and hard work!</p>
-            <p><a href="{{ url('/') }}">Visit Our Website</a></p>
+        <div class="footer">
+            <p>&copy; {{ date('Y') }} SEA-TEST. All rights reserved.</p>
         </div>
     </div>
 </body>

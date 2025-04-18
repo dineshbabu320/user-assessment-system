@@ -90,7 +90,7 @@ class ExamController extends Controller
         \Log::channel('custom')->info('Attempt ID', [$attemptId]);
 
         $totalScore = 0;
-        $maxScore = $exam->questions->count(); // Each question is worth 1 point
+        $maxScore = $exam->questions->sum('points'); // Sum of all question points
         $hasPendingEvaluation = false;
 
         // Process responses
@@ -115,7 +115,7 @@ class ExamController extends Controller
                 $isCorrect = $correctAnswers->toArray() === $userAnswers->toArray();
 
                 if ($isCorrect) {
-                    $totalScore++;
+                    $totalScore += $question->points; // Add points for correct answer
                 }
 
                 Response::create([
@@ -141,7 +141,7 @@ class ExamController extends Controller
                 $isCorrect = $question->answers->where('is_correct', true)->pluck('id')->map(fn($id) => (string) $id)->contains((string) $userResponse);
 
                 if ($isCorrect) {
-                    $totalScore++;
+                    $totalScore += $question->points; // Add points for correct answer
                 }
 
                 Response::create([
@@ -212,7 +212,7 @@ class ExamController extends Controller
             ->keyBy('question_id');
 
         // Calculate total score
-        $maxScore = $exam->questions->count() * 1; // Assuming each question is worth 1 point
+        $maxScore = $exam->questions->sum('points'); // Assuming each question is worth 1 point
         $totalScore = $attempt->score;
 
         return view('exam.review', [

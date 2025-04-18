@@ -9,6 +9,7 @@ use App\Http\Controllers\ManualEvaluationController;
 use App\Http\Controllers\Admin\RatingUpgradeController;
 use App\Http\Controllers\StudentHistoryController;
 use Illuminate\Support\Facades\Route;
+use Sentry\Laravel\Tracing\Middleware;
 
 Route::get('/', function() {
     return view('login');
@@ -17,7 +18,7 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 //All other routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', Middleware::class])->group(function () {
 
     //DashBoard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

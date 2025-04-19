@@ -36,7 +36,7 @@ class HasExamToken
             // Check if the user has a valid token for the exam
             $hasValidToken = $user->tokens()
                 ->where('user_cid', auth()->user()->cid)
-                ->where('id','READY-'.$exam->name)
+                ->where('id',$exam->name)
                 ->where('expires_at', '>', now())
                 ->where('status', 'active')
                 ->exists();
@@ -61,7 +61,7 @@ class HasExamToken
         // Check if the user has a valid token for the exam
         $hasValidToken = $user->tokens()
             ->where('user_cid', auth()->user()->cid)
-            ->where('id','READY-'.$examName)
+            ->where('id',$examName)
             ->where('expires_at', '>', now())
             ->where('status', 'active')
             ->exists();

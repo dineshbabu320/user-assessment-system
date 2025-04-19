@@ -5,7 +5,10 @@ use App\Models\Token;
 use App\Models\Response;
 use App\Models\Attempt;
 use App\Models\Exam;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Mail\ExamPassedNotification;
+use Illuminate\Support\Facades\Mail;
 
 class ExamController extends Controller
 {
@@ -181,6 +184,20 @@ class ExamController extends Controller
 
         // Mark the token as used
         $token->update(['status' => 'used']);
+
+        if ($status === 'passed') {
+            $user = auth()->user();
+            $exam = $attempt->exam;
+    
+            // Get admin and subdivision directors
+            $adminEmail = 'js.hoo@vat-sea.com';
+            $subdivisionDirectors = User::where('role_id', 2)
+                ->where('subdivision_id', $user->subdivision_id)
+                ->pluck('email')
+                ->toArray();
+            
+            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+        }
 
         return redirect()->route('exam.review', $attemptId)->with('success', 'Exam submitted successfully.');
     }

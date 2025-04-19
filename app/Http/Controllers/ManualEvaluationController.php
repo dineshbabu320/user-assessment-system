@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Response;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ExamPassedNotification;
 use Illuminate\Http\Request;
 
 class ManualEvaluationController extends Controller
@@ -81,6 +83,20 @@ class ManualEvaluationController extends Controller
             'score' => $totalScore,
             'cooldown_until' => $status === 'failed' ? now()->addDays($attempt->attempt_number * 7) : null,
         ]);
+
+        if ($status === 'passed') {
+            $user = auth()->user();
+            $exam = $attempt->exam;
+    
+            // Get admin and subdivision directors
+            $adminEmail = 'js.hoo@vat-sea.com';
+            $subdivisionDirectors = User::where('role_id', 2)
+                ->where('subdivision_id', $user->subdivision_id)
+                ->pluck('email')
+                ->toArray();
+    
+            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+        }
 
         return redirect()->route('student.manualEvaluation')->with('success', 'All evaluations submitted successfully.');
     }

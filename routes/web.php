@@ -6,7 +6,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\ManualEvaluationController;
-use App\Http\Controllers\Admin\RatingUpgradeController;
 use App\Http\Controllers\StudentHistoryController;
 use Illuminate\Support\Facades\Route;
 use Sentry\Laravel\Tracing\Middleware;
@@ -52,7 +51,5 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/admin/questions/{id}/edit', [QuestionController::class, 'edit'])->name('admin.questions.edit');
         Route::put('/admin/questions/{id}', [QuestionController::class, 'update'])->name('admin.questions.update');
         Route::post('/api/exams/questions', [QuestionController::class, 'getQuestions'])->name('api.exams.questions');
-        Route::get('/admin/rating-upgrade-requests', [RatingUpgradeController::class, 'index'])->name('admin.ratingUpgradeRequests');
-        Route::post('/admin/rating-upgrade-requests/{id}/complete', [RatingUpgradeController::class, 'markAsCompleted'])->name('admin.markRatingUpgradeCompleted');
     });
 });

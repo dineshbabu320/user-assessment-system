@@ -6,10 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\Exam;
-use App\Models\RatingUpgradeRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\RatingUpgradeNotification;
 use App\Mail\TokenIssuedMail;
 use App\Models\Attempt; // Add this import if not already present
 
@@ -76,22 +74,7 @@ class StudentTokenController extends Controller
             'expires_at' => now()->addDays(14),
         ]);
 
-        // If the token is REC type, create a rating upgrade request
-        if (str_starts_with($request->token_id, 'REC')) {
-            $rating = substr($request->token_id, 4); // Extract the rating name after 'REC-'
-
-            RatingUpgradeRequest::create([
-                'user_cid' => $request->user_cid,
-                'token_id' => $request->token_id,
-                'rating' => $rating, // Store the rating
-            ]);
-
-            // Notify admin via email
-            Mail::to("hvdineshbabu@gmail.com")->queue(new RatingUpgradeNotification($token));
-        }
-        else {
-            Mail::to("hvdineshbabu@gmail.com")->queue(new TokenIssuedMail($token));
-        }
+        Mail::to($user->email)->queue(new TokenIssuedMail($token));
 
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");
     }

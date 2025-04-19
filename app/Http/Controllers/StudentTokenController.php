@@ -48,9 +48,9 @@ class StudentTokenController extends Controller
             ->orderBy('cooldown_until', 'desc') // Get the latest cooldown
             ->first();
 
-        // if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
-        //     return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
-        // }
+        if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
+            return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
+        }
 
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'

@@ -68,10 +68,9 @@ class LoginController extends Controller
         }
 
         $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));
-        // $data = OAuthController::mapOAuthProperties($resourceOwner);
-        // if ($resourceOwner->data->vatsim->division->id !== 'EUD') {
-        //     return redirect()->route('front')->withErrors('You are not authorized to access this system.');
-        // }
+        if ($resourceOwner->data->vatsim->division->id !== 'SEA') {
+            return redirect()->route('front')->withErrors('You are not authorized to access this system.');
+        }
 
         // if (
         //     ! $data['id'] ||

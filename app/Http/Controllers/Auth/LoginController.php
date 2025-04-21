@@ -64,7 +64,7 @@ class LoginController extends Controller
                 'code' => $request->input('code'),
             ]);
         } catch (IdentityProviderException $e) {
-            return redirect()->route('front')->withError('Authentication error: ' . $e->getMessage());
+            return redirect()->route('front')->withErrors('Authentication error: ' . $e->getMessage());
         }
 
         $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));

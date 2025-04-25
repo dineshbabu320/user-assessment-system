@@ -9,6 +9,7 @@
             <li>Have a continuous internet connection.</li>
             <li>Do not refresh the page during the exam.</li>
             <li>Answer all questions before submitting.</li>
+            <strong>Note: This application has not yet been designed to auto-save your answers.</strong>
         </ul>
         <div>
             <a href="{{ route('exam.take', $examName) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">

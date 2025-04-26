@@ -68,22 +68,9 @@ class LoginController extends Controller
         }
 
         $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));
-        if ($resourceOwner->data->vatsim->division->id !== 'SEA') {
+        if ($resourceOwner->data->vatsim->division->id !== 'SEA' || $resourceOwner->data->vatsim->rating->id<1) {
             return redirect()->route('front')->withErrors('You are not authorized to access this system.');
         }
-
-        // if (
-        //     ! $data['id'] ||
-        //     ! $data['email'] ||
-        //     ! $data['first_name'] ||
-        //     ! $data['last_name'] ||
-        //     ! $data['rating'] ||
-        //     ! $data['rating_short'] ||
-        //     ! $data['rating_long'] ||
-        //     ! $data['region']
-        // ) {
-        //     return redirect()->route('front')->withError('Missing data from sign-in request. You need to grant all permissions.');
-        // }
 
         $account = $this->completeLogin($resourceOwner->data, $accessToken);
 

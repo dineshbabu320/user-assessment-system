@@ -88,7 +88,7 @@
             <h1>Exam Notification</h1>
         </div>
         <div class="content">
-            <p>Dear Admin/Subdivision Directors</p>
+            <p>Dear Admin/Subdivision Directors,</p>
             <p>The following user has successfully passed an exam:</p>
             <p><strong>Name:</strong> {{ $user->name }}</p>
             <p><strong>CID:</strong> {{ $user->cid }}</p>

@@ -1,36 +1,35 @@
-# **SEA-TEST - ATC Exam System**
+# SEA-TEST
 
-## Overview
+What is SEA-TEST about? It is a exam center tailored for VATSEA to assess students initially on their new ratings.
 
-Welcome to the **SEA-TEST**—an advanced and intuitive **Air Traffic Control (ATC) Exam System** built for **VATSIM’s SouthEast Asia Division**. This system is designed to evaluate the knowledge, skills, and readiness of VATSIM members, helping them prepare for real-world air traffic control responsibilities.
+## Tech Stack:
 
-## Features
+This is pure laravel based application and it does not use any other stack.
 
-- **Interactive Testing**: Engage in a variety of ATC-related tests designed to simulate real-world challenges.
-- **Comprehensive Evaluation**: Multiple test modules covering different aspects of ATC, including communication, radar procedures, flight sequencing, and more.
-- **Instant Feedback**: Receive immediate feedback after completing tests to understand areas of improvement.
-- **Tracking Progress**: Keep track of your exam scores and progress as you prepare for certification.
-- **Easy-to-Use Interface**: Designed with a clean and user-friendly interface for an optimal exam experience.
+## Dependencies:
 
-## Getting Started
+1. php(version 8.2 and above)
+2. composer
+3. npm
 
-1. **Login**: To access the system, you must first log in with your VATSIM account credentials. This ensures the system tracks your progress and verifies your identity.
-2. **Select an Exam**: Choose from a range of available exams designed for different proficiency levels.
-3. **Complete the Test**: Answer questions and complete simulations based on real ATC scenarios.
-4. **Review Results**: Once the exam is completed, review your results and gain insights into your performance.
-5. **Prepare for Certification**: After passing the necessary exams, you can proceed to certification, ensuring you’re ready to handle the demands of ATC.
+## Commands to be run:
 
-## System Requirements
+### Dependency management commands
 
-- **Browser**: This system is web-based, and it works best in modern browsers like **Chrome**, **Firefox**, or **Edge**.
-- **Internet Connection**: A stable internet connection is required to ensure the smooth functioning of the exam system.
+For this application to fully function, we need a few commands to be run so that laravel handles everything as it is supposed to.
 
-## Contact Information
+1. `composer install` - This command creates a directory named 'vendor' inside of the main project folder and it contains all the dependencies that laravel needs. (Have to run only when application is setup initially or when a new dependency is added)
 
-If you have any questions or issues with the system, feel free to reach out to the support team via the following methods:
+2. `npm install` - Laravel by default uses tailwind for the frontend. npm is a frontend dependency manager that comes along with the nodejs package. This creates a folder named 'node_modules' which is packed with all the frontend dependencies. (Have to run only when application is setup initially or when a new dependency is added)
 
-- **Email**: hvdineshbabu@gmail.com
+### Application related commands
 
-## License
+1. `php artisan migrate` - This is used to create all the required tables in the database. This command works only when you give the correct credentials of the database inside the .env file. (Have to run only when application is setup initially or when a new migration is added). **For reference:** Migrations are nothing but blueprints for databases.
 
-This system is developed for the **SouthEast Asia Division of VATSIM** and is intended for internal use only. Unauthorized access or distribution is prohibited.
+2. `php artisan key:generate` - This is used to set the APP_KEY variable in the .env file. (Have to run only when application is setup initially)
+
+3. `php artisan queue:work` - This is queue worker command used to queue emails or jobs. For example, emails/jobs are queued into the database driver, then laravel daemon looks for any jobs available in the database, processes the email/job, once succeeds, then it is removed from the database. This is the heart of email sending and if for some reason, it stops, the entire email sending and internal job processing will stop.
+
+4. `npm run dev/build` - The dev version of this command starts a vite server which I use for HMR(Hot modular replacement) meaning, when I do any change in application, the site is refreshed for me. **Note:** This makes the asset loading incredibly slow and the site takes very long to load as it serves the frontend assets via vite's live server. The build version of this command is used to bundle all the assets into a /dist/ folder and serves the frontend extremely fast because it has compiled all the CSS.
+
+5. `php artisan serve` - This command brings up the application to 127.0.0.1 but in production environments I don't really use this, rather I write a nginx config file and it handles the stuff.

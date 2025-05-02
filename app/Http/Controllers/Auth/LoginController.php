@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\OAuthController;
 use App\Models\User;
 use Illuminate\Http\Request;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Illuminate\Support\Facades\Log;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 /**
  * This controller handles authenticating users for the application and
@@ -39,6 +39,7 @@ class LoginController extends Controller
     {
         Log::info('Login initiated', ['request' => $request->all()]);
 
+        // Step 1: Redirect to VATSIM authorization if no code or state is present
         if (! $request->has('code') || ! $request->has('state')) {
             $authorizationUrl = $this->provider->getAuthorizationUrl([
                 'required_scopes' => implode(' ', config('oauth.scopes')),
@@ -49,16 +50,20 @@ class LoginController extends Controller
             Log::info('Redirecting to VATSIM authorization URL', ['url' => $authorizationUrl]);
 
             return redirect()->away($authorizationUrl);
-        } elseif ($request->input('state') !== session()->pull('oauthstate')) {
+        }
+
+        // Step 2: Validate the state parameter
+        if ($request->input('state') !== session()->pull('oauthstate')) {
             Log::error('State mismatch detected', [
                 'request_state' => $request->input('state'),
                 'session_state' => session('oauthstate'),
             ]);
 
-            return redirect()->route('front')->withError('Something went wrong, please try again (state mismatch).');
-        } else {
-            return $this->verifyLogin($request);
+            return redirect()->route('front')->withErrors('Something went wrong, please try again (state mismatch).');
         }
+
+        // Step 3: Verify the login
+        return $this->verifyLogin($request);
     }
 
     /**
@@ -71,6 +76,7 @@ class LoginController extends Controller
     {
         Log::info('Verifying login', ['code' => $request->input('code')]);
 
+        // Step 1: Retrieve the access token
         try {
             $accessToken = $this->provider->getAccessToken('authorization_code', [
                 'code' => $request->input('code'),
@@ -81,17 +87,25 @@ class LoginController extends Controller
 
             return redirect()->route('front')->withErrors('Authentication error: ' . $e->getMessage());
         }
-
+        Log::info('Outgoing request headers', [
+            'headers' => $this->provider->getHeaders(),
+        ]);
+        // Step 2: Retrieve the resource owner
         try {
             $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));
             Log::info('Resource owner retrieved', ['resourceOwner' => (array) $resourceOwner]);
         } catch (\Exception $e) {
-            Log::error('Failed to retrieve resource owner', ['error' => $e->getMessage()]);
+            Log::error('Failed to retrieve resource owner', [
+                'error_message' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
 
             return redirect()->route('front')->withErrors('Failed to retrieve user details.');
         }
 
-        if ($resourceOwner->data->vatsim->division->id !== 'SEA' || $resourceOwner->data->vatsim->rating->id<1) {
+        // Step 3: Check user authorization
+        if ($resourceOwner->data->vatsim->division->id !== 'SEA' || $resourceOwner->data->vatsim->rating->id < 1) {
             Log::warning('Unauthorized access attempt', [
                 'division' => $resourceOwner->data->vatsim->division->id,
                 'rating' => $resourceOwner->data->vatsim->rating->id,

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Http\Request;
+use App\Helpers\ActivityLogger;
 
 class ManualEvaluationController extends Controller
 {
@@ -97,6 +98,9 @@ class ManualEvaluationController extends Controller
     
             Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
         }
+
+        // Log the action
+        ActivityLogger::log("Submitted evaluations for student CID '{$cid}' by " . auth()->user()->name);
 
         return redirect()->route('student.manualEvaluation')->with('success', 'All evaluations submitted successfully.');
     }

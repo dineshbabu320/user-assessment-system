@@ -7,6 +7,8 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\ManualEvaluationController;
 use App\Http\Controllers\StudentHistoryController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\RoleController;
 use Illuminate\Support\Facades\Route;
 use Sentry\Laravel\Tracing\Middleware;
 
@@ -31,6 +33,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/student/manual-evaluation/{cid}', [ManualEvaluationController::class, 'show'])->name('student.manualEvaluation.show');
         Route::post('/student/manual-evaluation/{cid}/evaluate-all', [ManualEvaluationController::class, 'evaluateAll'])->name('student.evaluateAll');
         Route::get('/student/{cid}', [StudentHistoryController::class, 'index'])->name('student.studentHistory');
+        Route::patch('/tokens/{token}/revoke', [StudentTokenController::class, 'revokeToken'])->name('tokens.revoke');
     });
 
     Route::get('/my-exams', [ExamController::class, 'myExams'])->name('my-exams');
@@ -51,5 +54,8 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/admin/questions/{id}/edit', [QuestionController::class, 'edit'])->name('admin.questions.edit');
         Route::put('/admin/questions/{id}', [QuestionController::class, 'update'])->name('admin.questions.update');
         Route::post('/api/exams/questions', [QuestionController::class, 'getQuestions'])->name('api.exams.questions');
+        Route::get('/admin/activity-log', [ActivityLogController::class, 'index'])->name('admin.activity-log');
+        Route::get('/admin/roles', [RoleController::class, 'index'])->name('admin.roles.index');
+        Route::post('/admin/roles/assign', [RoleController::class, 'assignRole'])->name('admin.roles.assign');
     });
 });

@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Support\Facades\Mail;
+use App\Helpers\ActivityLogger;
 
 class ExamController extends Controller
 {
@@ -198,6 +199,9 @@ class ExamController extends Controller
             
             Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
         }
+
+        // Log the action
+        ActivityLogger::log("Submitted exam '{$examName}' by " . auth()->user()->name);
 
         return redirect()->route('exam.review', $attemptId)->with('success', 'Exam submitted successfully.');
     }

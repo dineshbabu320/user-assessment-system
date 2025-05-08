@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TokenIssuedMail;
 use App\Models\Attempt; // Add this import if not already present
+use App\Helpers\ActivityLogger;
 
 class StudentTokenController extends Controller
 {
@@ -76,6 +77,27 @@ class StudentTokenController extends Controller
 
         Mail::to($user->email)->queue(new TokenIssuedMail($token));
 
+        // Log the action
+        ActivityLogger::log("Issued token '{$tokenId}' for {$user->name} (CID: {$user->cid}) by " . auth()->user()->name);
+
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");
+    }
+
+    public function revokeToken(Request $request, $tokenId)
+    {
+        $token = Token::findOrFail($tokenId);
+
+        // Check if the token is already revoked
+        if ($token->status === 'revoked') {
+            return redirect()->back()->with('error', 'This token is already revoked.');
+        }
+
+        // Update the token status to revoked
+        $token->update(['status' => 'revoked']);
+
+        // Log the action
+        ActivityLogger::log("Revoked token '{$token->id}' for {$token->user_cid} by " . auth()->user()->name);
+
+        return redirect()->back()->with('success', "Token ID {$token->id} has been successfully revoked.");
     }
 }

@@ -68,9 +68,9 @@ class LoginController extends Controller
         }
 
         $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));
-        if ($resourceOwner->data->vatsim->division->id !== 'SEA') {
-            return redirect()->route('front')->withErrors('You are not authorized to access this system.');
-        }
+        // if ($resourceOwner->data->vatsim->division->id !== 'SEA') {
+        //     return redirect()->route('front')->withErrors('You are not authorized to access this system.');
+        // }
 
         $account = $this->completeLogin($resourceOwner->data, $accessToken);
 

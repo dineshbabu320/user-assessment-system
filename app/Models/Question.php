@@ -16,7 +16,10 @@ class Question extends Model
         'question_type',
         'options',
         'correct_answer',
-        'points'
+        'points',
+        'correct_comment',
+        'wrong_comment', 
+        'file_path',
     ];
 
     protected $casts = [

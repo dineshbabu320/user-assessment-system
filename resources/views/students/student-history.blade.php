@@ -79,6 +79,9 @@
                             <th scope="col" class="px-6 py-3">Score</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3">Attempt Date</th>
+                            @if (auth()->user()->isAdmin())
+                                <th scope="col" class="px-6 py-3">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -96,6 +99,13 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
+                                @if (auth()->user()->isAdmin())
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                            Manually Evaluate
+                                        </a>
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -103,8 +113,8 @@
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>
-        @endif
-    </div>
+    @endif
+</div>
 
     <!-- Back Button -->
     <div class="mt-6">

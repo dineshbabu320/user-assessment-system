@@ -7,9 +7,23 @@
         <h2 class="text-lg font-medium text-gray-900 dark:text-white">Total Score: {{ $totalScore }}/{{ $maxScore }}</h2>
     </div>
     @foreach ($exam->questions as $question)
-        <div class="mb-6">
-            <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ $loop->iteration }}. {{ $question->question_text }}</h2>
-            
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center justify-between">
+                <span>{{ $loop->iteration }}. {{ $question->question_text }}</span>
+                <span class="text-sm text-blue-500 dark:text-blue-500">Points: {{ $question->points }}</span>
+            </h2>
+
+            <!-- Display Image or PDF -->
+            @if ($question->file_path)
+                <div class="mt-4 mb-4">
+                    @if (Str::endsWith($question->file_path, ['jpg', 'jpeg', 'png']))
+                        <img src="{{ asset('storage/' . $question->file_path) }}" alt="Question Image" class="max-w-md h-auto rounded-lg shadow-md">
+                    @elseif (Str::endsWith($question->file_path, 'pdf'))
+                        <a href="{{ asset('storage/' . $question->file_path) }}" target="_blank" class="text-blue-600 hover:underline">View PDF</a>
+                    @endif
+                </div>
+            @endif
+
             @if ($question->question_type === 'single')
                 <ul class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     @foreach ($question->answers as $answer)
@@ -26,10 +40,24 @@
                     @if (isset($responses[$question->id]))
                         @if ($responses[$question->id]->status === 'correct')
                             <span class="text-green-500 font-bold">Correct</span>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Comment: 
+                                @if ($responses[$question->id]->comments)
+                                    <span class="font-bold">{{ $responses[$question->id]->comments }}</span>
+                                @else
+                                    {{ $question->correct_comment }}
+                                @endif
+                            </p>
                         @elseif ($responses[$question->id]->status === 'incorrect')
                             <span class="text-red-500 font-bold">Incorrect</span>
-                        @else
-                            <span class="text-yellow-500 font-bold">Manual Evaluation</span>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Comment: 
+                                @if ($responses[$question->id]->comments)
+                                    <span class="font-bold">{{ $responses[$question->id]->comments }}</span>
+                                @else
+                                    {{ $question->wrong_comment }}
+                                @endif
+                            </p>
                         @endif
                     @else
                         <span class="text-gray-900 dark:text-white font-bold">Not Answered</span>
@@ -50,10 +78,24 @@
                     Status: 
                     @if ($responses[$question->id]->status === 'correct')
                         <span class="text-green-500 font-bold">Correct</span>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            Comment: 
+                            @if ($responses[$question->id]->comments)
+                                <span class="font-bold">{{ $responses[$question->id]->comments }}</span>
+                            @else
+                                {{ $question->correct_comment }}
+                            @endif
+                        </p>
                     @elseif ($responses[$question->id]->status === 'incorrect')
                         <span class="text-red-500 font-bold">Incorrect</span>
-                    @else
-                        <span class="text-yellow-500 font-bold">Manual Evaluation</span>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            Comment: 
+                            @if ($responses[$question->id]->comments)
+                                <span class="font-bold italic">{{ $responses[$question->id]->comments }}</span>
+                            @else
+                                {{ $question->wrong_comment }}
+                            @endif
+                        </p>
                     @endif
                 </p>
             @elseif ($question->question_type === 'text')
@@ -63,8 +105,24 @@
                     @if (isset($responses[$question->id]))
                         @if ($responses[$question->id]->status === 'correct')
                             <span class="text-green-500 font-bold">Correct</span>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Comment: 
+                                @if ($responses[$question->id]->comments)
+                                    <span class="font-bold italic">{{ $responses[$question->id]->comments }}</span>
+                                @else
+                                    {{ $question->correct_comment }}
+                                @endif
+                            </p>
                         @elseif ($responses[$question->id]->status === 'incorrect')
                             <span class="text-red-500 font-bold">Incorrect</span>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Comment: 
+                                @if ($responses[$question->id]->comments)
+                                    <span class="font-bold italic">{{ $responses[$question->id]->comments }}</span>
+                                @else
+                                    {{ $question->wrong_comment }}
+                                @endif
+                            </p>
                         @else
                             <span class="text-yellow-500 font-bold">Manual Evaluation</span>
                         @endif

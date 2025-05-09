@@ -19,6 +19,7 @@ class Response extends Model
         'comments',
         'evaluated_by',
         'evaluated_at',
+        'points_awarded',
     ];
 
     public $timestamps=false;

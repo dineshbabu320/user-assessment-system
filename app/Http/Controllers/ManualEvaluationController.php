@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Response;
 use App\Models\User;
+use App\Models\Attempt;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Http\Request;
@@ -82,7 +83,7 @@ class ManualEvaluationController extends Controller
         $attempt->update([
             'status' => $status,
             'score' => $totalScore,
-            'cooldown_until' => $status === 'failed' ? now()->addDays($attempt->attempt_number * 7) : null,
+            'cooldown_until' => $status === 'failed' ? now()->addDays(3) : null,
         ]);
 
         if ($status === 'passed') {
@@ -103,5 +104,56 @@ class ManualEvaluationController extends Controller
         ActivityLogger::log("Submitted evaluations for student CID '{$cid}' by " . auth()->user()->name);
 
         return redirect()->route('student.manualEvaluation')->with('success', 'All evaluations submitted successfully.');
+    }
+
+    public function manualEvaluate($attemptId)
+    {
+        $attempt = Attempt::with(['responses.question', 'exam'])->findOrFail($attemptId);
+
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('admin.manual-evaluation-admin', compact('attempt'));
+    }
+
+    public function submitManualEvaluation(Request $request, $attemptId)
+    {
+        $request->validate([
+            'responses' => 'required|array',
+            'responses.*.status' => 'required|in:correct,incorrect',
+            'responses.*.points' => 'required|numeric|min:0',
+            'responses.*.comments' => 'nullable|string',
+        ]);
+
+        $attempt = Attempt::with('responses')->findOrFail($attemptId);
+
+        foreach ($request->responses as $responseId => $data) {
+            $response = $attempt->responses->find($responseId);
+            if ($response) {
+                $response->update([
+                    'status' => $data['status'],
+                    'points_awarded' => $data['points'], // Store custom points
+                    'comments' => $data['comments'] ?? null,
+                    'evaluated_by' => auth()->user()->cid,
+                    'evaluated_at' => now(),
+                ]);
+            }
+        }
+
+        // Recalculate the attempt's score and status
+        $totalScore = $attempt->responses->sum('points_awarded'); // Sum custom points
+        $maxScore = $attempt->exam->questions->sum('points');
+        $status = ($totalScore / $maxScore) >= 0.8 ? 'passed' : 'failed';
+
+        $attempt->update([
+            'score' => $totalScore,
+            'status' => $status,
+        ]);
+
+        // Log the action
+        ActivityLogger::log("Manually evaluated attempt ID '{$attemptId}' by admin " . auth()->user()->name);
+
+        return redirect()->route('student.studentHistory', $attempt->user_cid)->with('success', 'Manual evaluation completed successfully.');
     }
 }

@@ -78,16 +78,28 @@ class QuestionController extends Controller
             'question_type' => 'required|in:mcq,single,text',
             'options' => 'required_if:question_type,mcq,single|nullable|string',
             'correct_answers' => 'required_if:question_type,mcq,single|nullable|string',
+            'points' => 'required|integer|min:1',
+            'correct_comment' => 'nullable|string',
+            'wrong_comment' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validate file type and size
         ]);
 
         $question = Question::findOrFail($id);
 
+        $filePath = $question->file_path;
+        if ($request->hasFile('file')) {
+            if ($filePath) {
+                \Storage::disk('public')->delete($filePath); // Delete the old file
+            }
+            $filePath = $request->file('file')->store('question_files', 'public'); // Store the new file
+        }
+
         $options = $request->question_type !== 'text' && $request->options
-            ? array_map('trim', explode(',', $request->options))
+            ? array_map('trim', explode('|', $request->options)) // Use | as the separator
             : null;
 
         $correctAnswers = $request->question_type !== 'text' && $request->correct_answers
-            ? array_map('trim', explode(',', $request->correct_answers))
+            ? array_map('trim', explode('|', $request->correct_answers)) // Use | as the separator
             : null;
 
         \Log::channel('custom')->info('Processed options:', ['options' => $options]);
@@ -98,7 +110,10 @@ class QuestionController extends Controller
             'question_text' => $request->question_text,
             'question_type' => $request->question_type,
             'options' => $options ? json_encode($options) : null,
-            'points' => $request->points, // Update points
+            'points' => $request->points,
+            'correct_comment' => $request->correct_comment,
+            'wrong_comment' => $request->wrong_comment,
+            'file_path' => $filePath,
         ]);
 
         \Log::channel('custom')->info('Question updated:', $question->toArray());
@@ -134,17 +149,25 @@ class QuestionController extends Controller
             'question_type' => 'required|in:mcq,single,text',
             'options' => 'required_if:question_type,mcq,single|nullable|string',
             'correct_answers' => 'required_if:question_type,mcq,single|nullable|string',
-            'points' => 'required|integer|min:1', // Validate points
-            'additional_exams' => 'nullable|array', // Validate additional exams
-            'additional_exams.*' => 'exists:exams,id', // Ensure each additional exam exists
+            'points' => 'required|integer|min:1',
+            'correct_comment' => 'nullable|string',
+            'wrong_comment' => 'nullable|string',
+            'additional_exams' => 'nullable|array',
+            'additional_exams.*' => 'exists:exams,id',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validate file type and size
         ]);
 
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('question_files', 'public'); // Store file in the 'public/question_files' directory
+        }
+
         $options = $request->question_type !== 'text' && $request->options
-            ? array_map('trim', explode(',', $request->options))
+            ? array_map('trim', explode('|', $request->options)) // Use | as the separator
             : null;
 
         $correctAnswers = $request->question_type !== 'text' && $request->correct_answers
-            ? array_map('trim', explode(',', $request->correct_answers))
+            ? array_map('trim', explode('|', $request->correct_answers)) // Use | as the separator
             : null;
 
         \Log::channel('custom')->info('Processed options:', ['options' => $options]);
@@ -156,7 +179,10 @@ class QuestionController extends Controller
             'question_text' => $request->question_text,
             'question_type' => $request->question_type,
             'options' => $options ? json_encode($options) : null,
-            'points' => $request->points, // Save points
+            'points' => $request->points,
+            'correct_comment' => $request->correct_comment,
+            'wrong_comment' => $request->wrong_comment,
+            'file_path' => $filePath,
         ]);
 
         \Log::channel('custom')->info('Question created:', $question->toArray());
@@ -211,5 +237,20 @@ class QuestionController extends Controller
 
         return redirect()->route('admin.questions.index', ['exam_id' => $request->exam_id])
             ->with('success', 'Question added successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $question = Question::findOrFail($id);
+
+        // Log the action
+        \Log::channel('custom')->info("Deleting question ID: {$id}", ['question' => $question]);
+
+        $question->delete();
+
+        // Log the action
+        ActivityLogger::log("Deleted question '{$question->question_text}' for exam ID {$question->exam_id} by " . auth()->user()->name);
+
+        return response()->json(['success' => true, 'message' => 'Question deleted successfully.']);
     }
 }

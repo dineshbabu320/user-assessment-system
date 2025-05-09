@@ -42,14 +42,14 @@ class StudentTokenController extends Controller
         
         // Check for cooldown period in the attempts table
         $cooldown = Attempt::where('user_cid', $request->user_cid)
-            ->where('status', 'failed') // Assuming 'failed' indicates a failed attempt
-            ->whereNotNull('cooldown_until') // Ensure cooldown_until is set
+            ->where('status', 'failed') 
+            ->whereNotNull('cooldown_until') 
             ->orderBy('cooldown_until', 'desc') // Get the latest cooldown
             ->first();
 
-        if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
-            return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
-        }
+        // if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
+        //     return redirect()->back()->with('error', "Token cannot be issued. Cooldown period ends on {$cooldown->cooldown_until->format('Y-m-d')}.");
+        // }
 
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'

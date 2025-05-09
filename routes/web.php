@@ -57,5 +57,8 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/admin/activity-log', [ActivityLogController::class, 'index'])->name('admin.activity-log');
         Route::get('/admin/roles', [RoleController::class, 'index'])->name('admin.roles.index');
         Route::post('/admin/roles/assign', [RoleController::class, 'assignRole'])->name('admin.roles.assign');
+        Route::delete('/admin/questions/{id}', [QuestionController::class, 'destroy'])->name('admin.questions.destroy');
+        Route::get('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'manualEvaluate'])->name('manual-evaluation-admin.show');
+        Route::post('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'submitManualEvaluation'])->name('manual-evaluation-admin.submit');
     });
 });

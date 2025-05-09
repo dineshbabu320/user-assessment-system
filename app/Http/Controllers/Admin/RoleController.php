@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Helpers\ActivityLogger;
 use App\Models\User;
 
 class RoleController extends Controller
@@ -26,6 +27,14 @@ class RoleController extends Controller
         $user = User::where('cid', $request->cid)->firstOrFail(); 
         $user->role_id = $request->role_id; 
         $user->save();
+
+        //Log the role assignment activity
+        if($request->role_id==2) {
+            ActivityLogger::log("Added role Subdivision Director to {$request->cid} by " . auth()->user()->name);
+        }
+        else {
+            ActivityLogger::log("Added role Admin to {$request->cid} by " . auth()->user()->name);
+        }
 
         return redirect()->route('admin.roles.index')->with('success', "Role updated for {$user->name} (CID: {$user->cid}).");
     }

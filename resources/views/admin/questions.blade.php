@@ -39,6 +39,8 @@
                     <th scope="col" class="px-6 py-3">Options</th>
                     <th scope="col" class="px-6 py-3">Correct Answers</th>
                     <th scope="col" class="px-6 py-3">Points</th>
+                    <th scope="col" class="px-6 py-3">HINTPASS</th>
+                    <th scope="col" class="px-6 py-3">HINTFAIL</th>
                     <th scope="col" class="px-6 py-3">Actions</th>
                 </tr>
             </thead>
@@ -94,11 +96,21 @@
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4">${question.question_text}</td>
                     <td class="px-6 py-4">${question.question_type || 'N/A'}</td>
-                    <td class="px-6 py-4">${question.options?.join(', ') || 'N/A'}</td>
-                    <td class="px-6 py-4">${question.correct_answers?.join(', ') || 'N/A'}</td>
+                    <td class="px-6 py-4">${question.options?.join(' | ') || 'N/A'}</td>
+                    <td class="px-6 py-4">${question.correct_answers?.join(' | ') || 'N/A'}</td>
                     <td class="px-6 py-4">${question.points}</td>
+                    <td class="px-6 py-4">${question.correct_comment ?? 'N/A'}</td>
+                    <td class="px-6 py-4">${question.wrong_comment ?? 'N/A'}</td>
                     <td class="px-6 py-4">
-                        <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>
+                        <div class="flex items-center space-x-4 actions">
+                            <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>
+                            <button 
+                                class="text-red-600 hover:underline cursor-pointer delete-question-btn" 
+                                data-id="${question.id}" 
+                                data-question="${question.question_text}">
+                                Delete
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -118,6 +130,32 @@
             });
 
             questionsTableContainer.classList.remove('hidden');
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-question-btn').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const questionId = button.dataset.id;
+                    const questionText = button.dataset.question;
+
+                    if (confirm(`Are you sure you want to delete the question: "${questionText}"?`)) {
+                        try {
+                            const response = await fetch(`/admin/questions/${questionId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                            });
+
+                            if (!response.ok) throw new Error('Failed to delete question');
+                            alert('Question deleted successfully.');
+                            loadQuestions(examSelect.value); // Reload questions
+                        } catch (error) {
+                            console.error('Error deleting question:', error);
+                            alert('Failed to delete question. Please try again.');
+                        }
+                    }
+                });
+            });
         };
 
         // Automatically load questions for the first exam or the selected exam

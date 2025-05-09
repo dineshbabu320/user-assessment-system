@@ -19,7 +19,7 @@
     <!-- Tokens Section -->
     <div class="mb-6">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tokens</h3>
-        @if ($student->tokens->count() > 0)
+        @if ($tokens->count() > 0)
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
@@ -32,7 +32,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($student->tokens as $token)
+                        @foreach ($tokens as $token)
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-6 py-4">{{ $token->id }}</td>
                                 <td class="px-6 py-4">{{ $token->issued_at->format('Y-m-d') }}</td>
@@ -62,6 +62,10 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Pagination Links -->
+            <div class="mt-4">
+                {{ $tokens->links() }}
+            </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
         @endif
@@ -70,7 +74,7 @@
     <!-- Exam Attempts Section -->
     <div class="mb-6">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Exam Attempts</h3>
-        @if ($student->attempts->count() > 0)
+        @if ($attempts->count() > 0)
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
@@ -85,7 +89,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($student->attempts as $attempt)
+                        @foreach ($attempts as $attempt)
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-6 py-4">{{ $attempt->exam->name }}</td>
                                 <td class="px-6 py-4">{{ $attempt->score ?? 'N/A' }}</td>
@@ -110,6 +114,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <!-- Pagination Links -->
+            <div class="mt-4">
+                {{ $attempts->links() }}
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>

@@ -56,7 +56,17 @@ class ExamController extends Controller
 
         $exam = $token->exam()->with('questions.answers')->firstOrFail();
 
-        return view('exam.take', ['exam' => $exam]);
+        $questionLimit = $exam->question_limit ?? $exam->questions->count();
+        $questions = $exam->questions->shuffle()->take($questionLimit);
+
+        // Store the limited questions in the session
+        session(['limited_questions' => $questions->pluck('id')->toArray()]);
+        \Log::channel('custom')->info('Limited questions set in session', session('limited_questions'));
+
+        return view('exam.take', [
+            'exam' => $exam,
+            'questions' => $questions, // Pass the limited and shuffled questions
+        ]);
     }
 
     /**
@@ -71,6 +81,9 @@ class ExamController extends Controller
             ->firstOrFail();
 
         $exam = $token->exam()->with('questions.answers')->firstOrFail();
+
+        // Fetch the limited questions from the session
+        $limitedQuestionIds = session('limited_questions', []);
 
         // Check previous attempts
         $previousAttempts = Attempt::where('user_cid', auth()->user()->cid)
@@ -94,11 +107,11 @@ class ExamController extends Controller
         \Log::channel('custom')->info('Attempt ID', [$attemptId]);
 
         $totalScore = 0;
-        $maxScore = $exam->questions->sum('points'); // Sum of all question points
+        $maxScore = $exam->questions->whereIn('id', $limitedQuestionIds)->sum('points'); // Sum of points for limited questions
         $hasPendingEvaluation = false;
 
-        // Process responses
-        foreach ($exam->questions as $question) {
+        // Process responses for limited questions only
+        foreach ($exam->questions->whereIn('id', $limitedQuestionIds) as $question) {
             $userResponse = $request->input("answers.{$question->id}");
 
             if ($question->question_type === 'mcq') {
@@ -232,8 +245,10 @@ class ExamController extends Controller
             ->get()
             ->keyBy('question_id');
 
-        // Calculate total score
-        $maxScore = $exam->questions->sum('points'); // Assuming each question is worth 1 point
+        $attendedQuestionIds = $responses->keys();
+        $questions = $exam->questions->whereIn('id',$attendedQuestionIds);
+
+        $maxScore = $exam->questions->whereIn('id', $attendedQuestionIds)->sum('points');
         $totalScore = $attempt->score;
 
         return view('exam.review', [
@@ -242,6 +257,34 @@ class ExamController extends Controller
             'attempt' => $attempt,
             'totalScore' => $totalScore,
             'maxScore' => $maxScore,
+            'questions' => $questions,
         ]);
+    }
+
+    public function examSettings()
+    {
+        $exams = Exam::with('questions')->get(); // Fetch all exams with their questions
+        return view('admin.admin-settings', compact('exams'));
+    }
+
+    public function updateExamSettings(Request $request)
+    {
+        $request->validate([
+            'question_limits' => 'required|array',
+            'question_limits.*' => 'integer|min:1',
+        ]);
+
+        foreach ($request->question_limits as $examId => $limit) {
+            $exam = Exam::findOrFail($examId);
+            $maxQuestions = $exam->questions()->count();
+
+            if ($limit > $maxQuestions) {
+                return redirect()->back()->withErrors("The limit for '{$exam->name}' cannot exceed the total number of questions ({$maxQuestions}).");
+            }
+
+            $exam->update(['question_limit' => $limit]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'Exam settings updated successfully.');
     }
 }

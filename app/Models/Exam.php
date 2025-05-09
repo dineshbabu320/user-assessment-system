@@ -9,7 +9,8 @@ class Exam extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    public $timestamps=false;
+    protected $fillable = ['name','question_limit'];
 
     public function questions(): HasMany
     {

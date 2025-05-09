@@ -6,7 +6,7 @@
     <div class="mb-6">
         <h2 class="text-lg font-medium text-gray-900 dark:text-white">Total Score: {{ $totalScore }}/{{ $maxScore }}</h2>
     </div>
-    @foreach ($exam->questions as $question)
+    @foreach ($questions as $question)
         <div class="mb-8">
             <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center justify-between">
                 <span>{{ $loop->iteration }}. {{ $question->question_text }}</span>

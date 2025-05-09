@@ -47,4 +47,9 @@ class Response extends Model
     {
         return $this->belongsTo(Attempt::class, 'attempt_id');
     }
+
+    public function answer()
+    {
+        return $this->belongsTo(Answer::class,'response_text','id');
+    }
 }

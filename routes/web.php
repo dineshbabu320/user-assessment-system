@@ -60,5 +60,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::delete('/admin/questions/{id}', [QuestionController::class, 'destroy'])->name('admin.questions.destroy');
         Route::get('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'manualEvaluate'])->name('manual-evaluation-admin.show');
         Route::post('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'submitManualEvaluation'])->name('manual-evaluation-admin.submit');
+        Route::get('/admin/settings', [ExamController::class, 'examSettings'])->name('admin.settings');
+        Route::put('/admin/settings', [ExamController::class, 'updateExamSettings'])->name('admin.updateSettings');
     });
 });

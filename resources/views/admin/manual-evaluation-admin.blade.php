@@ -11,7 +11,16 @@
                 <p class="text-gray-700 dark:text-gray-300">Student Response:</p>
                 @if ($response->answer)
                     <!-- Display the answer text for valid Answer IDs -->
-                    <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $response->answer->answer_text }}</textarea>
+                    @if ($response->question->question_type=='mcq')
+                        @php
+                            $responseIds = explode(',', $response->response_text);
+                            $answers = \App\Models\Answer::whereIn('id', $responseIds)->pluck('answer_text');
+                            $answers = implode(', ', $answers->toArray());
+                        @endphp
+                        <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $answers }}</textarea>
+                    @else
+                        <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $response->answer->answer_text }}</textarea>
+                    @endif
                 @else (!is_null($response->response_text))
                     <!-- Display the raw response text for text-based questions -->
                     <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $response->response_text }}</textarea>

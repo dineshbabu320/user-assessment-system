@@ -104,7 +104,7 @@
         // Function to validate category ratios
         const validateCategoryRatios = (examId) => {
             const totalQuestionsInput = document.querySelector(`#question_limit_${examId}`);
-            const totalQuestions = parseInt(totalQuestionsInput.value, 10);
+            const totalQuestions = parseInt(totalQuestionsInput.value, 10) || parseInt(totalQuestionsInput.getAttribute('data-question-limit'), 10);
 
             const categoryInputsForExam = document.querySelectorAll(`.category-input[data-exam-id="${examId}"]`);
             let sum = 0;

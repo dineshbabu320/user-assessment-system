@@ -61,7 +61,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'manualEvaluate'])->name('manual-evaluation-admin.show');
         Route::post('/manual-evaluation-admin/{attemptId}', [ManualEvaluationController::class, 'submitManualEvaluation'])->name('manual-evaluation-admin.submit');
         Route::get('/admin/settings', [ExamController::class, 'examSettings'])->name('admin.settings');
-        Route::put('/admin/settings', [ExamController::class, 'updateExamSettings'])->name('admin.updateSettings');
+        Route::put('/admin/update-settings', [ExamController::class, 'updateExamSettings'])->name('admin.updateSettings');
         Route::post('/admin/questions/{id}/remove-file', [QuestionController::class, 'removeFile'])->name('admin.questions.remove-file');
     });
 });

@@ -28,7 +28,6 @@ class QuestionController extends Controller
 
     public function getQuestions(Request $request)
     {
-        \Log::channel('custom')->info('getQuestions method called with exam ID:', ['exam_id' => $request->exam_id]);
 
         $request->validate([
             'exam_id' => 'required|exists:exams,id',
@@ -36,8 +35,7 @@ class QuestionController extends Controller
 
         $exam = Exam::findOrFail($request->exam_id);
 
-        // Use paginate instead of get
-        $questions = $exam->questions()->with('answers')->paginate(10); // 10 questions per page
+        $questions = $exam->questions()->with('answers')->paginate(10); 
 
         $questions->getCollection()->transform(function ($question) {
             return [
@@ -52,7 +50,7 @@ class QuestionController extends Controller
 
         return response()->json([
             'questions' => $questions->items(),
-            'pagination' => $questions->links('pagination::tailwind')->render(), // Render Tailwind pagination links
+            'pagination' => $questions->links('pagination::tailwind')->render(),
         ]);
     }
 
@@ -69,8 +67,6 @@ class QuestionController extends Controller
 
     public function update(Request $request, $id)
     {
-        \Log::channel('custom')->info('Update method called for question ID:', ['id' => $id]);
-        \Log::channel('custom')->info('Update method data:', $request->all());
 
         $request->validate([
             'exam_id' => 'required|exists:exams,id',
@@ -81,7 +77,8 @@ class QuestionController extends Controller
             'points' => 'required|integer|min:1',
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validate file type and size
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf', 
+            'category' => 'required|string|max:255',
         ]);
 
         $question = Question::findOrFail($id);
@@ -102,9 +99,6 @@ class QuestionController extends Controller
             ? array_map('trim', explode('|', $request->correct_answers)) // Use | as the separator
             : null;
 
-        \Log::channel('custom')->info('Processed options:', ['options' => $options]);
-        \Log::channel('custom')->info('Processed correct answers:', ['correct_answers' => $correctAnswers]);
-
         $question->update([
             'exam_id' => $request->exam_id,
             'question_text' => $request->question_text,
@@ -114,12 +108,12 @@ class QuestionController extends Controller
             'correct_comment' => $request->correct_comment,
             'wrong_comment' => $request->wrong_comment,
             'file_path' => $filePath,
+            'category' => $request->category,
         ]);
 
         \Log::channel('custom')->info('Question updated:', $question->toArray());
 
         $question->answers()->delete();
-        \Log::channel('custom')->info('Existing answers deleted for question ID:', ['id' => $id]);
 
         if (in_array($request->question_type, ['mcq', 'single']) && $options) {
             foreach ($options as $option) {
@@ -132,8 +126,7 @@ class QuestionController extends Controller
             }
         }
 
-        // Log the action
-        ActivityLogger::log("Updated question '{$question->question_text}' for exam ID {$request->exam_id} by " . auth()->user()->name);
+        ActivityLogger::log("Updated question '{$question->id}' for exam {$question->exam->name} by " . auth()->user()->name);
 
         return redirect()->route('admin.questions.index', ['exam_id' => $request->exam_id])
             ->with('success', 'Question updated successfully!');
@@ -141,7 +134,6 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-        \Log::channel('custom')->info('Store method called with data:', $request->all());
 
         $request->validate([
             'exam_id' => 'required|exists:exams,id',
@@ -154,7 +146,8 @@ class QuestionController extends Controller
             'wrong_comment' => 'nullable|string',
             'additional_exams' => 'nullable|array',
             'additional_exams.*' => 'exists:exams,id',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validate file type and size
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf', 
+            'category' => 'required|string|max:255',
         ]);
 
         $filePath = null;
@@ -170,9 +163,6 @@ class QuestionController extends Controller
             ? array_map('trim', explode('|', $request->correct_answers)) // Use | as the separator
             : null;
 
-        \Log::channel('custom')->info('Processed options:', ['options' => $options]);
-        \Log::channel('custom')->info('Processed correct answers:', ['correct_answers' => $correctAnswers]);
-
         // Create the question for the main exam
         $question = Question::create([
             'exam_id' => $request->exam_id,
@@ -183,6 +173,7 @@ class QuestionController extends Controller
             'correct_comment' => $request->correct_comment,
             'wrong_comment' => $request->wrong_comment,
             'file_path' => $filePath,
+            'category' => $request->category,
         ]);
 
         \Log::channel('custom')->info('Question created:', $question->toArray());
@@ -207,7 +198,7 @@ class QuestionController extends Controller
                     'question_text' => $request->question_text,
                     'question_type' => $request->question_type,
                     'options' => $options ? json_encode($options) : null,
-                    'points' => $request->points, // Save points
+                    'points' => $request->points, 
                 ]);
 
                 \Log::channel('custom')->info('Additional question created for exam ID:', [
@@ -232,8 +223,7 @@ class QuestionController extends Controller
             }
         }
 
-        // Log the action
-        ActivityLogger::log("Created question '{$question->question_text}' for exam ID {$request->exam_id} by " . auth()->user()->name);
+        ActivityLogger::log("Created question of ID:'{$question->id}' for exam {$question->exam->name} by " . auth()->user()->name);
 
         return redirect()->route('admin.questions.index', ['exam_id' => $request->exam_id])
             ->with('success', 'Question added successfully!');
@@ -243,14 +233,32 @@ class QuestionController extends Controller
     {
         $question = Question::findOrFail($id);
 
-        // Log the action
-        \Log::channel('custom')->info("Deleting question ID: {$id}", ['question' => $question]);
-
         $question->delete();
 
         // Log the action
-        ActivityLogger::log("Deleted question '{$question->question_text}' for exam ID {$question->exam_id} by " . auth()->user()->name);
+        ActivityLogger::log("Deleted question '{$question->id}' for exam {$question->exam->name} by " . auth()->user()->name);
 
         return response()->json(['success' => true, 'message' => 'Question deleted successfully.']);
+    }
+
+    public function removeFile($id)
+    {
+        $question = Question::findOrFail($id);
+
+        if ($question->file_path) {
+            if (\Storage::disk('public')->exists($question->file_path)) {
+                \Storage::disk('public')->delete($question->file_path); // Delete the file
+                $question->update(['file_path' => null]); // Set file_path to null
+            }
+        }
+
+        ActivityLogger::log("Removed file from question of ID:'{$question->id}' for exam ID {$question->exam->name} by " . auth()->user()->name);
+
+        // Return JSON response with redirect URL
+        return response()->json([
+            'success' => true,
+            'message' => 'File removed successfully!',
+            'redirect_url' => route('admin.questions.edit', $id), // Redirect to the edit page
+        ]);
     }
 }

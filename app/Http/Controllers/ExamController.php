@@ -7,6 +7,7 @@ use App\Models\Attempt;
 use App\Models\Exam;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Parsedown;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Support\Facades\Mail;
 use App\Helpers\ActivityLogger;
@@ -25,7 +26,7 @@ class ExamController extends Controller
             ->where('status', 'active')
             ->where('expires_at', '>', now())
             ->where('id','LIKE','READY-%')
-            ->with('exam') // Assuming a relationship exists between Token and Exam
+            ->with('exam')
             ->get();
 
         return view('exam.my-exams', compact('active_tokens'));
@@ -54,18 +55,31 @@ class ExamController extends Controller
             ->where('expires_at', '>', now())
             ->firstOrFail();
 
-        $exam = $token->exam()->with('questions.answers')->firstOrFail();
+        $exam = $token->exam()->with('questions')->firstOrFail();
 
-        $questionLimit = $exam->question_limit ?? $exam->questions->count();
-        $questions = $exam->questions->shuffle()->take($questionLimit);
+        $categoryRatios = $exam->category_ratios ?? [];
+        $selectedQuestions = collect();
+
+        // Randomly select questions from each category based on the ratios
+        foreach ($categoryRatios as $category => $count) {
+            $categoryQuestions = $exam->questions->where('category', $category);
+            $selectedQuestions = $selectedQuestions->merge($categoryQuestions->shuffle()->take($count));
+        }
+
+        $selectedQuestions = $selectedQuestions->shuffle();
 
         // Store the limited questions in the session
-        session(['limited_questions' => $questions->pluck('id')->toArray()]);
+        session(['limited_questions' => $selectedQuestions->pluck('id')->toArray()]);
         \Log::channel('custom')->info('Limited questions set in session', session('limited_questions'));
+
+        $parsedown = new Parsedown();
+        foreach ($selectedQuestions as $question) {
+            $question->parsed_text = $parsedown->text($question->question_text);
+        }
 
         return view('exam.take', [
             'exam' => $exam,
-            'questions' => $questions, // Pass the limited and shuffled questions
+            'questions' => $selectedQuestions,
         ]);
     }
 
@@ -248,6 +262,11 @@ class ExamController extends Controller
         $attendedQuestionIds = $responses->keys();
         $questions = $exam->questions->whereIn('id',$attendedQuestionIds);
 
+        $parsedown = new Parsedown();
+        foreach ($questions as $question) {
+            $question->parsed_text = $parsedown->text($question->question_text);
+        }
+
         $maxScore = $exam->questions->whereIn('id', $attendedQuestionIds)->sum('points');
         $totalScore = $attempt->score;
 
@@ -272,6 +291,8 @@ class ExamController extends Controller
         $request->validate([
             'question_limits' => 'required|array',
             'question_limits.*' => 'integer|min:1',
+            'category_ratios' => 'required|array',
+            'category_ratios.*.*' => 'nullable|integer|min:0',
         ]);
 
         foreach ($request->question_limits as $examId => $limit) {
@@ -284,6 +305,13 @@ class ExamController extends Controller
 
             $exam->update(['question_limit' => $limit]);
         }
+
+        foreach ($request->category_ratios as $examId => $ratios) {
+            $exam = Exam::findOrFail($examId);
+            $exam->update(['category_ratios' => $ratios]);
+        }
+
+        ActivityLogger::log("Settings updated by ".auth()->user()->name);
 
         return redirect()->route('admin.settings')->with('success', 'Exam settings updated successfully.');
     }

@@ -43,7 +43,7 @@ class DashboardController extends Controller
         // Get user's exam attempts
         $exam_attempts = Attempt::where('user_cid', $user->cid)
                             ->orderBy('attempted_at', 'desc')
-                            ->paginate(10);
+                            ->paginate(5);
 
         return view('dashboard', compact('user_rating', 'active_token', 'exam_attempts', 'subdivisionName', 'subdivisionID'));
     }

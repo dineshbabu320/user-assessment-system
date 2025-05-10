@@ -106,8 +106,7 @@
                             <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>
                             <button 
                                 class="text-red-600 hover:underline cursor-pointer delete-question-btn" 
-                                data-id="${question.id}" 
-                                data-question="${question.question_text}">
+                                data-id="${question.id}" >
                                 Delete
                             </button>
                         </div>

@@ -155,7 +155,7 @@
     </div>
     
     <div class="mt-4">
-        {{ $exam_attempts->links('pagination::tailwind') }}
+        {{ $exam_attempts->links('vendor.pagination.flowbite') }}
     </div>
 </div>
 

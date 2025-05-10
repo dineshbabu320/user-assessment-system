@@ -26,7 +26,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $logs->links() }}
+        {{ $logs->links('vendor.pagination.flowbite') }}
     </div>
 </div>
 @endsection

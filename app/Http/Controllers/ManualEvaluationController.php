@@ -152,7 +152,7 @@ class ManualEvaluationController extends Controller
         ]);
 
         // Log the action
-        ActivityLogger::log("Manually evaluated attempt ID '{$attemptId}' by admin " . auth()->user()->name);
+        ActivityLogger::log("Manually evaluated attempt ID '{$attemptId}' for student with CID ({$attempt->user_cid}) by admin " . auth()->user()->name);
 
         return redirect()->route('student.studentHistory', $attempt->user_cid)->with('success', 'Manual evaluation completed successfully.');
     }

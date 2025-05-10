@@ -7,10 +7,11 @@
         @csrf
         @foreach ($questions as $question)
             <div class="mb-8">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center justify-between">
-                    <span>{{ $loop->iteration }}. {{ $question->question_text }}</span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">Points: {{ $question->points }}</span>
-                </h2>
+                <div class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                    <span class="mr-2">{{ $loop->iteration }}.</span>
+                    <span class="inline-block">{!! $question->parsed_text !!}</span>
+                    <span class="ml-auto">Points: {{ $question->points }}</span>
+                </div>
 
                 <!-- Display Image or PDF -->
                 @if ($question->file_path)

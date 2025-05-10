@@ -30,7 +30,7 @@
         </table>
     </div>
     <div class="mt-4">
-        {{ $students->links('pagination::tailwind') }}
+        {{ $students->links('vendor.pagination.flowbite') }}
     </div>
 </div>
 @endsection

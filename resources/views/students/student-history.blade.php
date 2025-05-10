@@ -64,7 +64,7 @@
             </div>
             <!-- Pagination Links -->
             <div class="mt-4">
-                {{ $tokens->links() }}
+                {{ $tokens->links('vendor.pagination.flowbite') }}
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
@@ -117,7 +117,7 @@
             </div>
             <!-- Pagination Links -->
             <div class="mt-4">
-                {{ $attempts->links() }}
+                {{ $attempts->links('vendor.pagination.flowbite') }}
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>

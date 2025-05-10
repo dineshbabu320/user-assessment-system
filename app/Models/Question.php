@@ -20,6 +20,7 @@ class Question extends Model
         'correct_comment',
         'wrong_comment', 
         'file_path',
+        'category'
     ];
 
     protected $casts = [

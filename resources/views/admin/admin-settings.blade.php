@@ -36,11 +36,15 @@
                             <input type="number" 
                                    name="question_limits[{{ $exam->id }}]" 
                                    id="question_limit_{{ $exam->id }}" 
-                                   value="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
+                                   value="{{ $exam->question_limit ?? ($exam->questions()->count() > 0 ? $exam->questions()->count() : 1) }}" 
                                    min="1" 
-                                   max="{{ $exam->questions()->count() }}" 
-                                   data-question-limit="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
-                                   class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                   max="{{ $exam->questions()->count() > 0 ? $exam->questions()->count() : 1 }}" 
+                                   data-question-limit="{{ $exam->question_limit ?? ($exam->questions()->count() > 0 ? $exam->questions()->count() : 1) }}" 
+                                   class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                                   {{ $exam->questions()->count() === 0 ? 'disabled' : '' }}>
+                            @if ($exam->questions()->count() === 0)
+                                <p class="text-sm text-yellow-500 mt-2">This exam has no questions. Please add questions before setting the question limit.</p>
+                            @endif
                         </div>  
                         @php
                             $categories = $exam->questions->groupBy('category');

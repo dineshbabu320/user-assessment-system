@@ -292,6 +292,7 @@ class ExamController extends Controller
             'question_limits' => 'required|array',
             'question_limits.*' => 'integer|min:1',
             'category_ratios' => 'required|array',
+            'category_ratios.*' => 'array',
             'category_ratios.*.*' => 'nullable|integer|min:0',
         ]);
 
@@ -308,6 +309,15 @@ class ExamController extends Controller
 
         foreach ($request->category_ratios as $examId => $ratios) {
             $exam = Exam::findOrFail($examId);
+
+            // Validate that the sum of category ratios does not exceed the question limit
+            $totalRatio = array_sum($ratios);
+            $questionLimit = $exam->question_limit ?? $exam->questions()->count();
+
+            if ($totalRatio > $questionLimit) {
+                return redirect()->back()->withErrors("The sum of category ratios for '{$exam->name}' cannot exceed the total question limit ({$questionLimit}).");
+            }
+
             $exam->update(['category_ratios' => $ratios]);
         }
 

@@ -36,10 +36,10 @@
                             <input type="number" 
                                    name="question_limits[{{ $exam->id }}]" 
                                    id="question_limit_{{ $exam->id }}" 
-                                   value="{{ $exam->question_limit }}" 
+                                   value="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
                                    min="1" 
                                    max="{{ $exam->questions()->count() }}" 
-                                   data-question-limit="{{ $exam->question_limit }}" 
+                                   data-question-limit="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
                                    class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                         </div>  
                         @php

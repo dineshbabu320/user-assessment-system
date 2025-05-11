@@ -59,7 +59,7 @@
                                        id="category_ratio_{{ $exam->id }}_{{ $loop->index }}" 
                                        value="{{ $exam->category_ratios[$category] ?? '' }}" 
                                        min="0" 
-                                       max="{{ $exam->question_limit }}" 
+                                       max="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
                                        class="category-input w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
                                        data-exam-id="{{ $exam->id }}">
                             </div>
@@ -153,6 +153,23 @@
             input.addEventListener('input', () => {
                 const examId = input.id.replace('question_limit_', '');
                 validateCategoryRatios(examId);
+            });
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const totalQuestionsInputs = document.querySelectorAll('[id^="question_limit_"]');
+
+        totalQuestionsInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const examId = input.id.replace('question_limit_', '');
+                const newLimit = parseInt(input.value, 10);
+
+                // Update the max attribute of all category inputs for this exam
+                const categoryInputs = document.querySelectorAll(`.category-input[data-exam-id="${examId}"]`);
+                categoryInputs.forEach(categoryInput => {
+                    categoryInput.setAttribute('max', newLimit);
+                });
             });
         });
     });

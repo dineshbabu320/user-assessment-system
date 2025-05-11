@@ -7,7 +7,12 @@
         @csrf
         @foreach ($responses as $response)
             <div class="mb-6 p-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-white">Question: {{ $response->question->question_text }}</h2>
+                <div class="flex items-start space-x-4 mb-2">
+                    <span class="text-lg font-medium text-gray-900 dark:text-white">Question:</span>
+                    <div class="flex-1">
+                        <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $response->question->parsed_text !!}</span>
+                    </div>
+                </div>
                 <p class="text-gray-700 dark:text-gray-300">Student Response:</p>
                 <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $response->response_text }}</textarea>
                 <div class="mt-4">

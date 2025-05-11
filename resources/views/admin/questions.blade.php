@@ -34,13 +34,12 @@
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
                 <tr>
+                    <th scope="col" class="px-6 py-3">ID</th>
                     <th scope="col" class="px-6 py-3">Question</th>
                     <th scope="col" class="px-6 py-3">Type</th>
                     <th scope="col" class="px-6 py-3">Options</th>
                     <th scope="col" class="px-6 py-3">Correct Answers</th>
                     <th scope="col" class="px-6 py-3">Points</th>
-                    <th scope="col" class="px-6 py-3">HINTPASS</th>
-                    <th scope="col" class="px-6 py-3">HINTFAIL</th>
                     <th scope="col" class="px-6 py-3">Actions</th>
                 </tr>
             </thead>
@@ -94,13 +93,12 @@
             // Render the questions in the table
             questionsTableBody.innerHTML = questions.map(question => `
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td class="px-6 py-4">${question.id}</td>
                     <td class="px-6 py-4">${question.question_text}</td>
                     <td class="px-6 py-4">${question.question_type || 'N/A'}</td>
                     <td class="px-6 py-4">${question.options?.join(' | ') || 'N/A'}</td>
                     <td class="px-6 py-4">${question.correct_answers?.join(' | ') || 'N/A'}</td>
                     <td class="px-6 py-4">${question.points}</td>
-                    <td class="px-6 py-4">${question.correct_comment ?? 'N/A'}</td>
-                    <td class="px-6 py-4">${question.wrong_comment ?? 'N/A'}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center space-x-4 actions">
                             <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>

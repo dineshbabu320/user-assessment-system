@@ -22,7 +22,7 @@
             <div class="mb-4">
                 <label for="role_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
                 <select name="role_id" id="role_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
-                    <option value="2">Subdivision Director</option>
+                    <option value="2">Subdivision Staff</option>
                     <option value="3">Admin</option>
                 </select>
             </div>
@@ -49,7 +49,7 @@
                         <td class="px-6 py-4">{{ $user->email }}</td>
                         <td class="px-6 py-4">
                             @if ($user->role_id == 2)
-                                Subdivision Director
+                                Subdivision Staff
                             @elseif ($user->role_id == 3)
                                 Admin
                             @endif

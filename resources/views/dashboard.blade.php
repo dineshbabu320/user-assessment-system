@@ -108,7 +108,7 @@
     </div>
 
     <!-- Exam Attempts Table -->
-    <div class="relative overflow-x-auto shadow-md">
+    <div class="relative overflow-x-auto shadow-xl">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <!-- Table Header -->
             <thead class="text-xs text-white uppercase bg-cyan-900 dark:bg-cyan-900 dark:text-white">

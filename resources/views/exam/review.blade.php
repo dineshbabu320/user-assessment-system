@@ -28,7 +28,7 @@
             @endif
 
             @if ($question->question_type === 'single')
-                <ul class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <ul class="w-auto shadow-md text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:shadow-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     @foreach ($question->answers as $answer)
                         <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
                             <div class="flex items-center ps-3">
@@ -67,7 +67,7 @@
                     @endif
                 </p>
             @elseif ($question->question_type === 'mcq')
-                <ul class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <ul class="w-auto shadown-md text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:shadow-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     @foreach ($question->answers as $answer)
                         <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
                             <div class="flex items-center ps-3">

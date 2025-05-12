@@ -199,6 +199,10 @@ class QuestionController extends Controller
                     'question_type' => $request->question_type,
                     'options' => $options ? json_encode($options) : null,
                     'points' => $request->points, 
+                    'correct_comment' => $request->correct_comment,
+                    'wrong_comment' => $request->wrong_comment,
+                    'file_path' => $filePath,
+                    'category' => $request->category,
                 ]);
 
                 \Log::channel('custom')->info('Additional question created for exam ID:', [

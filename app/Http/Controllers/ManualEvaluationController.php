@@ -58,6 +58,7 @@ class ManualEvaluationController extends Controller
         $request->validate([
             'responses' => 'required|array',
             'responses.*.status' => 'required|in:correct,incorrect',
+            'responses.*.points' => 'required|numeric|min:0',
             'responses.*.comments' => 'nullable|string',
         ]);
 
@@ -65,6 +66,7 @@ class ManualEvaluationController extends Controller
             $response = Response::findOrFail($responseId);
             $response->update([
                 'status' => $data['status'],
+                'points_awarded' => $data['points'], // Store custom points
                 'comments' => $data['comments'] ?? null,
                 'evaluated_by' => auth()->user()->cid,
                 'evaluated_at' => now(),
@@ -75,11 +77,13 @@ class ManualEvaluationController extends Controller
         $attempt = $response->attempt;
         $responses = $attempt->responses;
 
-        $totalScore = $responses->where('status', 'correct')->sum(function ($response) {
+        $totalScore = $responses->sum('points_awarded'); // Sum custom points
+        $totalScore += $attempt->score;
+
+        $maxScore = $responses->sum(function ($response) {
             return $response->question->points;
         });
 
-        $maxScore = $attempt->exam->questions->sum('points');
         $hasPendingEvaluation = $responses->where('status', 'pending')->isNotEmpty();
 
         $status = $hasPendingEvaluation
@@ -137,7 +141,7 @@ class ManualEvaluationController extends Controller
             'responses.*.comments' => 'nullable|string',
         ]);
 
-        $attempt = Attempt::with('responses')->findOrFail($attemptId);
+        $attempt = Attempt::with(['responses.question'])->findOrFail($attemptId);
 
         foreach ($request->responses as $responseId => $data) {
             $response = $attempt->responses->find($responseId);
@@ -154,13 +158,31 @@ class ManualEvaluationController extends Controller
 
         // Recalculate the attempt's score and status
         $totalScore = $attempt->responses->sum('points_awarded'); // Sum custom points
-        $maxScore = $attempt->exam->questions->sum('points');
+
+        $maxScore = $attempt->responses->sum(function ($response) {
+            return $response->question->points;
+        });
+
         $status = ($totalScore / $maxScore) >= 0.8 ? 'passed' : 'failed';
 
         $attempt->update([
             'score' => $totalScore,
             'status' => $status,
         ]);
+
+        if ($status === 'passed') {
+            $user = auth()->user();
+            $exam = $attempt->exam;
+    
+            // Get admin and subdivision directors
+            $adminEmail = 'js.hoo@vat-sea.com';
+            $subdivisionDirectors = User::where('role_id', 2)
+                ->where('subdivision_id', $user->subdivision_id)
+                ->pluck('email')
+                ->toArray();
+            
+            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+        }
 
         // Log the action
         ActivityLogger::log("Manually evaluated attempt ID '{$attemptId}' for student with CID ({$attempt->user_cid}) by admin " . auth()->user()->name);

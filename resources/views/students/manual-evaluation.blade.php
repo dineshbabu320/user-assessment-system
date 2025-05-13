@@ -15,6 +15,8 @@
                 </div>
                 <p class="text-gray-700 dark:text-gray-300">Student Response:</p>
                 <textarea class="w-full bg-gray-100 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>{{ $response->response_text }}</textarea>
+                
+                <!-- Evaluation Dropdown -->
                 <div class="mt-4">
                     <label class="block text-sm font-medium text-gray-900 dark:text-white">Evaluation</label>
                     <select name="responses[{{ $response->id }}][status]" class="w-full bg-gray-50 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -22,6 +24,14 @@
                         <option value="incorrect">Incorrect</option>
                     </select>
                 </div>
+
+                <!-- Points Input -->
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-900 dark:text-white">Points Awarded (Max: {{ $response->question->points }})</label>
+                    <input type="number" name="responses[{{ $response->id }}][points]" min="0" max="{{ $response->question->points }}" step="0.5" class="w-full bg-gray-50 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+
+                <!-- Comments -->
                 <div class="mt-4">
                     <label class="block text-sm font-medium text-gray-900 dark:text-white">Comments</label>
                     <textarea name="responses[{{ $response->id }}][comments]" rows="3" class="w-full bg-gray-50 border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>

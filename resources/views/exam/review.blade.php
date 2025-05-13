@@ -4,8 +4,25 @@
 <div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4">
     <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Exam Review: {{ $exam->name }}</h1>
     <div class="mb-6">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Total Score: {{ $totalScore }}/{{ $maxScore }}</h2>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+            Status: 
+            @if ($attempt->status === 'passed')
+                <span class="text-green-500 font-bold">Passed</span>
+            @elseif ($attempt->status === 'failed')
+                <span class="text-red-500 font-bold">Failed</span>
+            @else
+                <span class="text-yellow-500 font-bold">Waiting for Manual Evaluation</span>
+            @endif
+        </h2>
     </div>
+
+    <div class="mb-6">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+            Total Score: {{ $totalScore }}/{{ $maxScore }} 
+            ({{ round(($totalScore / $maxScore) * 100, 2) }}%)
+        </h2>
+    </div>
+
     @foreach ($questions as $question)
         <div class="mb-8">
             <div class="flex items-start space-x-4 mb-5">
@@ -13,7 +30,6 @@
                 <div class="flex-1">
                     <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $question->parsed_text !!}</span>
                 </div>
-                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Points: {{ $question->points }}</span>
             </div>
 
             <!-- Display Image or PDF -->
@@ -67,7 +83,7 @@
                     @endif
                 </p>
             @elseif ($question->question_type === 'mcq')
-                <ul class="w-auto shadown-md text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:shadow-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <ul class="w-auto shadow-md text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:shadow-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     @foreach ($question->answers as $answer)
                         <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
                             <div class="flex items-center ps-3">
@@ -133,9 +149,6 @@
                         <span class="text-gray-500 font-bold">Not Answered</span>
                     @endif
                 </p>
-                @if (isset($responses[$question->id]) && ($responses[$question->id]->status === 'correct' || $responses[$question->id]->status === 'incorrect'))
-                    <p class="text-black dark:text-white">Mentor Comments: {{ $responses[$question->id]->comments ?? 'No comments' }}</p>
-                @endif
             @endif
         </div>
     @endforeach

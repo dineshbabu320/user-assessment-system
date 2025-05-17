@@ -19,9 +19,15 @@ class StudentHistoryController extends Controller
             ->with(['tokens', 'attempts.exam'])
             ->firstOrFail();
 
-        // Paginate tokens and attempts
-        $tokens = $student->tokens()->orderBy('issued_at','desc')->paginate(5); 
-        $attempts = $student->attempts()->with('exam')->orderBy('attempted_at','desc')->paginate(5); 
+        // Custom query parameters
+        $tokens = $student->tokens()
+            ->orderBy('issued_at', 'desc')
+            ->paginate(5, ['*'], 'tokens_page');
+
+        $attempts = $student->attempts()
+            ->with('exam')
+            ->orderBy('attempted_at', 'desc')
+            ->paginate(5, ['*'], 'attempts_page');
 
         return view('students.student-history', compact('student', 'tokens', 'attempts'));
     }

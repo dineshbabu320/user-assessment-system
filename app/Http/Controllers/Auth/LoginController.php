@@ -93,8 +93,16 @@ class LoginController extends Controller
         $account->name = $data->personal->name_full;
         $account->email = $data->personal->email;
         $account->atc_rating = $data->vatsim->rating->id;
-        $account->subdivision_id = $data->vatsim->subdivision->id;
-        $account->subdivision_name = $data->vatsim->subdivision->name;
+
+        // Check if user is VATGOV
+        if($data->cid==901134)
+        {
+            $account->subdivision_id = "NIL";
+            $account->subdivision_name = "NIL";
+        } else {
+            $account->subdivision_id = $data->vatsim->subdivision->id;
+            $account->subdivision_name = $data->vatsim->subdivision->name;
+        }
 
         if (!$account->exists) {
             $account->role_id = 1;

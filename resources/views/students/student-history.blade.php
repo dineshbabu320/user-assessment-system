@@ -15,9 +15,9 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">Email: {{ $student->email }}</p>
         <p class="text-sm text-gray-600 dark:text-gray-400">Subdivision: {{ $student->subdivision_name ?? 'N/A' }}</p>
     </div>
-
+        
     <!-- Tokens Section -->
-    <div class="mb-6">
+    <div id="tokens-section" class="mb-6">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tokens</h3>
         @if ($tokens->count() > 0)
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
@@ -64,7 +64,7 @@
             </div>
             <!-- Pagination Links -->
             <div class="mt-4">
-                {{ $tokens->links('vendor.pagination.flowbite') }}
+                {{ $tokens->appends(['attempts_page' => request('attempts_page')])->links('vendor.pagination.flowbite') }}
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Exam Attempts Section -->
-    <div class="mb-6">
+    <div id="attempts-section" class="mb-6">
         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Exam Attempts</h3>
         @if ($attempts->count() > 0)
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
@@ -105,7 +105,8 @@
                                 <td class="px-6 py-4">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
                                 @if (auth()->user()->isAdmin())
                                     <td class="px-6 py-4">
-                                        <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" 
+                                        class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm">
                                             Manually Evaluate
                                         </a>
                                     </td>
@@ -117,16 +118,27 @@
             </div>
             <!-- Pagination Links -->
             <div class="mt-4">
-                {{ $attempts->links('vendor.pagination.flowbite') }}
+                {{ $attempts->appends(['tokens_page' => request('tokens_page')])->links('vendor.pagination.flowbite') }}
             </div>
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>
-    @endif
-</div>
+        @endif
+    </div>
 
     <!-- Back Button -->
     <div class="mt-6">
         <a href="{{ route('students.search') }}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Back to Search</a>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('tokens_page')) {
+            document.getElementById('tokens-section').scrollIntoView({ behavior: 'smooth' });
+        } else if (urlParams.has('attempts_page')) {
+            document.getElementById('attempts-section').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+</script>
 @endsection

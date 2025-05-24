@@ -93,7 +93,9 @@ class ManualEvaluationController extends Controller
             $user = auth()->user();
             $exam = $attempt->exam;
 
-            $subdivisionDirectors = User::where('role_id', 2)
+            $subdivisionDirectors = User::whereHas('roles', function ($query) {
+                    $query->where('id', 2);
+                })
                 ->where('subdivision_id', $user->subdivision_id)
                 ->pluck('email')
                 ->toArray();
@@ -165,7 +167,9 @@ class ManualEvaluationController extends Controller
             $user = auth()->user();
             $exam = $attempt->exam;
 
-            $subdivisionDirectors = User::where('role_id', 2)
+            $subdivisionDirectors = User::whereHas('roles', function ($query) {
+                    $query->where('id', 2);
+                })
                 ->where('subdivision_id', $user->subdivision_id)
                 ->pluck('email')
                 ->toArray();

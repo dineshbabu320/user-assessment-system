@@ -108,9 +108,11 @@
                                                 <option value="READY-S2">READY-S2</option>
                                                 <option value="READY-S3">READY-S3</option>
                                                 <option value="READY-C1">READY-C1</option>
-                                                <option value="READY-C3">READY-C3</option>
-                                                <option value="READY-I1">READY-I1</option>
-                                                <option value="REC-I1">READY-I3</option>
+                                                @if(auth()->user()->isAdmin())
+                                                    <option value="READY-C3">READY-C3</option>
+                                                    <option value="READY-I1">READY-I1</option>
+                                                    <option value="REC-I1">READY-I3</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer">

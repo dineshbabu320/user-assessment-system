@@ -13,7 +13,6 @@
                     <div class="flex-1">
                         <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $question->parsed_text !!}</span>
                     </div>
-                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Points: {{ $question->points }}</span>
                 </div>
 
                 <!-- Display Image or PDF -->

@@ -108,7 +108,7 @@
                                 @if (auth()->user()->isAdmin())
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" 
-                                           class="block sm:inline-block w-full sm:w-auto text-center px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm cursor-pointer">
+                                           class="w-full sm:w-auto inline-block text-center px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm cursor-pointer">
                                             Manually Evaluate
                                         </a>
                                     </td>

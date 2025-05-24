@@ -105,6 +105,7 @@ class LoginController extends Controller
         }
 
         if (!$account->exists) {
+            $account->save();
             $account->roles()->syncWithoutDetaching([1]);
         }
 

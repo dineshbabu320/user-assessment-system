@@ -94,18 +94,18 @@ class LoginController extends Controller
         $account->email = $data->personal->email;
         $account->atc_rating = $data->vatsim->rating->id;
 
-        // Check if user is VATGOV
-        if($data->cid==901134)
-        {
+        // For VATGOV
+        if ($data->vatsim->rating->id == 12) {
             $account->subdivision_id = "NIL";
             $account->subdivision_name = "NIL";
+            $account->roles()->syncWithoutDetaching([3]);
         } else {
             $account->subdivision_id = $data->vatsim->subdivision->id;
             $account->subdivision_name = $data->vatsim->subdivision->name;
         }
 
         if (!$account->exists) {
-            $account->role_id = 1;
+            $account->roles()->syncWithoutDetaching([1]);
         }
 
         $account->save();

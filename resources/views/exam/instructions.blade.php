@@ -29,9 +29,12 @@
             Note: This application has not yet been designed to auto-save your answers.
         </div>
         <div class="mt-6">
-            <a href="{{ route('exam.take', $examName) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Start Exam
-            </a>
+            <form method="POST" action="{{ route('exam.start', $examName) }}">
+                @csrf
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+                    Start Exam
+                </button>
+            </form>
         </div>
     </div>
 </div>

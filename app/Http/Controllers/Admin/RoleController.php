@@ -6,36 +6,80 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ActivityLogger;
 use App\Models\User;
+use App\Models\Role;
 
 class RoleController extends Controller
 {
     public function index()
     {
-        // Fetch users with role_id 2 (Subdivision Directors) or 3 (Admins)
-        $users = User::whereIn('role_id', [2, 3])->paginate(10);
-
-        return view('admin.rolecontrol', compact('users'));
+        $users = User::with('roles')->paginate(10); // show roles
+        $roles = Role::all();
+        return view('admin.rolecontrol', compact('users', 'roles'));
     }
 
     public function assignRole(Request $request)
     {
         $request->validate([
-            'cid' => 'required|exists:users,cid', 
-            'role_id' => 'required|in:2,3', 
+            'cid' => 'required|exists:users,cid',
+            'role_ids' => 'nullable|array',
+            'role_ids.*' => 'integer|exists:roles,id',
         ]);
 
-        $user = User::where('cid', $request->cid)->firstOrFail(); 
-        $user->role_id = $request->role_id; 
-        $user->save();
+        $user = User::where('cid', $request->cid)->firstOrFail();
 
-        //Log the role assignment activity
-        if($request->role_id==2) {
-            ActivityLogger::log("Added role Subdivision Director to {$user->name}({$user->cid}) by " . auth()->user()->name);
-        }
-        else {
-            ActivityLogger::log("Added role Admin to {$user->name}({$user->cid}) by " . auth()->user()->name);
+        $roles = $request->role_ids ?? [];
+
+        // If empty, revert to Student
+        if (empty($roles)) {
+            $user->roles()->sync([1]);
+            ActivityLogger::log("All roles removed for {$user->name} ({$user->cid}), revert to Student by " . auth()->user()->name);
+            return redirect()->route('admin.roles.index')->with('success', "All roles removed. User now Student.");
         }
 
-        return redirect()->route('admin.roles.index')->with('success', "Role updated for {$user->name} (CID: {$user->cid}).");
+        // If SUP present, only assign SUP
+        $supIds = [3];
+        $supSelected = array_intersect($roles, $supIds);
+        if (!empty($supSelected)) {
+            $user->roles()->sync($supSelected);
+        } else {
+            $user->roles()->sync($roles);
+        }
+
+        ActivityLogger::log("Updated roles for {$user->name} ({$user->cid}) by " . auth()->user()->name);
+
+        return redirect()->route('admin.roles.index')->with('success', "Roles updated for {$user->name} (CID: {$user->cid}).");
+    }
+
+    public function adjustRoles(Request $request)
+    {
+        $request->validate([
+            'cid' => 'required|exists:users,cid',
+            'role_ids' => 'nullable|array',
+            'role_ids.*' => 'integer|exists:roles,id',
+        ]);
+
+        $user = User::where('cid', $request->cid)->firstOrFail();
+
+        $roles = $request->role_ids ?? [];
+
+        // If empty, revert to Student
+        if (empty($roles)) {
+            $user->roles()->sync([1]);
+            ActivityLogger::log("All roles removed for {$user->name} ({$user->cid}), revert to Student by " . auth()->user()->name);
+            return redirect()->route('admin.roles.index')->with('success', "All roles removed. User now Student.");
+        }
+
+        // If SUP present, only assign SUP
+        $supIds = [3];
+        $supSelected = array_intersect($roles, $supIds);
+        if (!empty($supSelected)) {
+            $user->roles()->sync($supSelected);
+        } else {
+            $user->roles()->sync($roles);
+        }
+
+        ActivityLogger::log("Adjusted roles for {$user->name} ({$user->cid}) by " . auth()->user()->name);
+
+        return redirect()->route('admin.roles.index')->with('success', "Roles adjusted for {$user->name} (CID: {$user->cid}).");
     }
 }

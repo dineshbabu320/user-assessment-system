@@ -17,7 +17,6 @@ class HasExamToken
         // Check if the route contains an attemptId
         $attemptId = $request->route('attemptId');
         if ($attemptId) {
-            // Fetch the attempt
             $attempt = Attempt::where('id', $attemptId)
                 ->where('user_cid', $user->cid)
                 ->first();
@@ -26,14 +25,12 @@ class HasExamToken
                 return redirect()->route('dashboard')->with('error', 'The requested attempt does not exist.');
             }
 
-            // Fetch the associated exam
             $exam = $attempt->exam;
 
             if (!$exam) {
                 return redirect()->route('dashboard')->with('error', 'The requested exam does not exist.');
             }
 
-            // Check if the user has a valid token for the exam
             $hasValidToken = $user->tokens()
                 ->where('user_cid', auth()->user()->cid)
                 ->where('id', 'READY-' . $exam->name)
@@ -49,7 +46,7 @@ class HasExamToken
         }
 
         // If no attemptId, fallback to the existing examName logic
-        $examName = $request->route('examName'); // Get the exam name from the route
+        $examName = $request->route('examName');
 
         // Fetch the exam by name
         $exam = Exam::where('name', $examName)->first();

@@ -11,9 +11,131 @@ use Parsedown;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Support\Facades\Mail;
 use App\Helpers\ActivityLogger;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ExamController extends Controller
 {
+    // Constants
+    private const PASS_RATE = 0.8; // 80%
+    private const ADMIN_EMAIL = 'js.hoo@vat-sea.com';
+    private const TOKEN_PREFIX = 'READY-';
+
+    /**
+     * Process an MCQ question response
+     *
+     * @param string $attemptId The attempt ID
+     * @param object $question The question object
+     * @param mixed $userResponse The user's response
+     * @return array [score, isCorrect] The score earned and whether the answer was correct
+     */
+    private function processMCQResponse(string $attemptId, $question, $userResponse): array
+    {
+        if (is_null($userResponse)) {
+            // Question not answered
+            $this->createResponse($attemptId, $question->id, null, 'incorrect');
+            return [0, false];
+        }
+
+        $correctAnswers = $question->answers->where('is_correct', true)->pluck('id')->map(fn($id) => (string) $id)->sort()->values();
+        $userAnswers = collect($userResponse)->map(fn($answer) => (string) $answer)->sort()->values();
+        $isCorrect = $correctAnswers->toArray() === $userAnswers->toArray();
+
+        $score = $isCorrect ? $question->points : 0;
+
+        $this->createResponse(
+            $attemptId,
+            $question->id,
+            implode(',', $userAnswers->toArray()),
+            $isCorrect ? 'correct' : 'incorrect'
+        );
+
+        return [$score, $isCorrect];
+    }
+
+    /**
+     * Process a single-choice question response
+     *
+     * @param string $attemptId The attempt ID
+     * @param object $question The question object
+     * @param mixed $userResponse The user's response
+     * @return array [score, isCorrect] The score earned and whether the answer was correct
+     */
+    private function processSingleResponse(string $attemptId, $question, $userResponse): array
+    {
+        if (is_null($userResponse)) {
+            // Question not answered
+            $this->createResponse($attemptId, $question->id, null, 'incorrect');
+            return [0, false];
+        }
+
+        $isCorrect = $question->answers->where('is_correct', true)->pluck('id')->map(fn($id) => (string) $id)->contains((string) $userResponse);
+
+        $score = $isCorrect ? $question->points : 0;
+
+        $this->createResponse(
+            $attemptId,
+            $question->id,
+            (string) $userResponse,
+            $isCorrect ? 'correct' : 'incorrect'
+        );
+
+        return [$score, $isCorrect];
+    }
+
+    /**
+     * Process a text question response
+     *
+     * @param string $attemptId The attempt ID
+     * @param object $question The question object
+     * @param mixed $userResponse The user's response
+     * @return array [hasPendingEvaluation] Whether the response needs manual evaluation
+     */
+    private function processTextResponse(string $attemptId, $question, $userResponse): array
+    {
+        $this->createResponse($attemptId, $question->id, $userResponse, 'pending');
+        return [true]; // Has pending evaluation
+    }
+
+    /**
+     * Validate and retrieve an active exam token for the current user
+     *
+     * @param string $examName The name of the exam
+     * @param bool $checkStatus Whether to check the token status
+     * @return Token The validated token
+     * @throws ModelNotFoundException If the token is not found or invalid
+     */
+    private function validateExamToken(string $examName, bool $checkStatus = true): Token
+    {
+        $query = Token::where('user_cid', auth()->user()->cid)
+            ->where('id', self::TOKEN_PREFIX . $examName)
+            ->where('expires_at', '>', now());
+
+        if ($checkStatus) {
+            $query->where('status', 'active');
+        }
+
+        return $query->firstOrFail();
+    }
+
+    /**
+     * Create a response record for a question
+     *
+     * @param string $attemptId The attempt ID
+     * @param int $questionId The question ID
+     * @param mixed $responseText The response text
+     * @param string $status The response status
+     * @return Response The created response
+     */
+    private function createResponse(string $attemptId, int $questionId, $responseText, string $status): Response
+    {
+        return Response::create([
+            'user_cid' => auth()->user()->cid,
+            'attempt_id' => $attemptId,
+            'question_id' => $questionId,
+            'response_text' => $responseText,
+            'status' => $status,
+        ]);
+    }
     /**
      * My Exams section
      */
@@ -25,7 +147,7 @@ class ExamController extends Controller
         $active_tokens = Token::where('user_cid', $user->cid)
             ->where('status', 'active')
             ->where('expires_at', '>', now())
-            ->where('id','LIKE','READY-%')
+            ->where('id','LIKE', self::TOKEN_PREFIX . '%')
             ->with('exam')
             ->get();
 
@@ -37,40 +159,30 @@ class ExamController extends Controller
      */
     public function instructions($examName)
     {
-        $token = Token::where('user_cid', auth()->user()->cid)
-            ->where('id', 'READY-' . $examName)
-            ->where('expires_at', '>', now())
-            ->firstOrFail();
-
+        $token = $this->validateExamToken($examName, false);
         return view('exam.instructions', ['examName' => $examName]);
     }
 
     /**
      * Display the exam form.
      */
-    public function takeExam($examName)
+    public function takeExam(Request $request, $examName)
     {
-        $token = Token::where('user_cid', auth()->user()->cid)
-            ->where('id', 'READY-' . $examName)
-            ->where('expires_at', '>', now())
-            ->firstOrFail();
-
+        $token = $this->validateExamToken($examName);
         $exam = $token->exam()->with('questions')->firstOrFail();
 
-        $categoryRatios = $exam->category_ratios ?? [];
-        $selectedQuestions = collect();
+        $attemptId = $request->query('attempt');
+        $attempt = Attempt::where('id', $attemptId)
+            ->where('user_cid', auth()->user()->cid)
+            ->where('exam_id', $exam->id)
+            ->where('status', 'in_progress')
+            ->first();
 
-        // Randomly select questions from each category based on the ratios
-        foreach ($categoryRatios as $category => $count) {
-            $categoryQuestions = $exam->questions->where('category', $category);
-            $selectedQuestions = $selectedQuestions->merge($categoryQuestions->shuffle()->take($count));
+        if (!$attempt || !$attempt->question_ids) {
+            return redirect()->route('exam.instructions', $examName)->with('error', 'Please start the exam first.');
         }
 
-        $selectedQuestions = $selectedQuestions->shuffle();
-
-        // Store the limited questions in the session
-        session(['limited_questions' => $selectedQuestions->pluck('id')->toArray()]);
-        \Log::channel('custom')->info('Limited questions set in session', session('limited_questions'));
+        $selectedQuestions = $exam->questions->whereIn('id', $attempt->question_ids);
 
         $parsedown = new Parsedown();
         foreach ($selectedQuestions as $question) {
@@ -80,6 +192,7 @@ class ExamController extends Controller
         return view('exam.take', [
             'exam' => $exam,
             'questions' => $selectedQuestions,
+            'attemptId' => $attempt->id,
         ]);
     }
 
@@ -88,16 +201,17 @@ class ExamController extends Controller
      */
     public function submitExam(Request $request, $examName)
     {
-        $token = Token::where('user_cid', auth()->user()->cid)
-            ->where('id', 'READY-' . $examName)
-            ->where('expires_at', '>', now())
-            ->where('status', 'active')
-            ->firstOrFail();
-
+        $token = $this->validateExamToken($examName);
         $exam = $token->exam()->with('questions.answers')->firstOrFail();
 
-        // Fetch the limited questions from the session
-        $limitedQuestionIds = session('limited_questions', []);
+        $attemptId = $request->input('attempt_id');
+        $attempt = Attempt::where('id', $attemptId)
+            ->where('user_cid', auth()->user()->cid)
+            ->where('exam_id', $exam->id)
+            ->where('status', 'in_progress')
+            ->firstOrFail();
+
+        $limitedQuestionIds = $attempt->question_ids ?? [];
 
         // Check previous attempts
         $previousAttempts = Attempt::where('user_cid', auth()->user()->cid)
@@ -106,19 +220,6 @@ class ExamController extends Controller
             ->get();
 
         $attemptNumber = $previousAttempts->count() + 1;
-
-        // Create the attempt first
-        $attempt = Attempt::create([
-            'user_cid' => auth()->user()->cid,
-            'exam_id' => $exam->id,
-            'attempt_number' => $attemptNumber,
-            'attempted_at' => now(),
-            'status' => 'waiting_for_manual_evaluation', // Temporary status
-            'cooldown_until' => null,
-        ]);
-
-        $attemptId = $attempt->id; // Get the attempt ID
-        \Log::channel('custom')->info('Attempt ID', [$attemptId]);
 
         $totalScore = 0;
         $maxScore = $exam->questions->whereIn('id', $limitedQuestionIds)->sum('points'); // Sum of points for limited questions
@@ -129,68 +230,13 @@ class ExamController extends Controller
             $userResponse = $request->input("answers.{$question->id}");
 
             if ($question->question_type === 'mcq') {
-                if (is_null($userResponse)) {
-                    // Question not answered
-                    Response::create([
-                        'user_cid' => auth()->user()->cid,
-                        'attempt_id' => $attemptId,
-                        'question_id' => $question->id,
-                        'response_text' => null,
-                        'status' => 'incorrect',
-                    ]);
-                    continue;
-                }
-
-                $correctAnswers = $question->answers->where('is_correct', true)->pluck('id')->map(fn($id) => (string) $id)->sort()->values();
-                $userAnswers = collect($userResponse)->map(fn($answer) => (string) $answer)->sort()->values();
-                $isCorrect = $correctAnswers->toArray() === $userAnswers->toArray();
-
-                if ($isCorrect) {
-                    $totalScore += $question->points; // Add points for correct answer
-                }
-
-                Response::create([
-                    'user_cid' => auth()->user()->cid,
-                    'attempt_id' => $attemptId,
-                    'question_id' => $question->id,
-                    'response_text' => implode(',', $userAnswers->toArray()),
-                    'status' => $isCorrect ? 'correct' : 'incorrect',
-                ]);
+                [$score, $_] = $this->processMCQResponse($attemptId, $question, $userResponse);
+                $totalScore += $score;
             } elseif ($question->question_type === 'single') {
-                if (is_null($userResponse)) {
-                    // Question not answered
-                    Response::create([
-                        'user_cid' => auth()->user()->cid,
-                        'attempt_id' => $attemptId,
-                        'question_id' => $question->id,
-                        'response_text' => null,
-                        'status' => 'incorrect',
-                    ]);
-                    continue;
-                }
-
-                $isCorrect = $question->answers->where('is_correct', true)->pluck('id')->map(fn($id) => (string) $id)->contains((string) $userResponse);
-
-                if ($isCorrect) {
-                    $totalScore += $question->points; // Add points for correct answer
-                }
-
-                Response::create([
-                    'user_cid' => auth()->user()->cid,
-                    'attempt_id' => $attemptId,
-                    'question_id' => $question->id,
-                    'response_text' => (string) $userResponse,
-                    'status' => $isCorrect ? 'correct' : 'incorrect',
-                ]);
+                [$score, $_] = $this->processSingleResponse($attemptId, $question, $userResponse);
+                $totalScore += $score;
             } elseif ($question->question_type === 'text') {
-                $hasPendingEvaluation = true; // Mark as pending evaluation
-                Response::create([
-                    'user_cid' => auth()->user()->cid,
-                    'attempt_id' => $attemptId,
-                    'question_id' => $question->id,
-                    'response_text' => $userResponse,
-                    'status' => 'pending',
-                ]);
+                [$hasPendingEvaluation] = $this->processTextResponse($attemptId, $question, $userResponse);
             }
         }
 
@@ -198,15 +244,14 @@ class ExamController extends Controller
         if ($hasPendingEvaluation) {
             $status = 'waiting_for_manual_evaluation';
         } else {
-            $passRate = 0.8; // 80%
-            $status = ($totalScore / $maxScore) >= $passRate ? 'passed' : 'failed';
+            $status = ($totalScore / $maxScore) >= self::PASS_RATE ? 'passed' : 'failed';
         }
         \Log::channel('custom')->info('Exam Score Check\n',[$totalScore]);
 
         // Update the attempt with the final status and score
         $attempt->update([
             'status' => $status,
-            'cooldown_until' => $status === 'failed' ? now()->addDays($attemptNumber * 7) : null,
+            'cooldown_until' => $status === 'failed' ? now()->addDays($attempt->attempt_number * 7) : null,
             'score' => $totalScore,
         ]);
 
@@ -216,15 +261,14 @@ class ExamController extends Controller
         if ($status === 'passed') {
             $user = auth()->user();
             $exam = $attempt->exam;
-    
+
             // Get admin and subdivision directors
-            $adminEmail = 'js.hoo@vat-sea.com';
             $subdivisionDirectors = User::where('role_id', 2)
                 ->where('subdivision_id', $user->subdivision_id)
                 ->pluck('email')
                 ->toArray();
-            
-            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $totalScore));
         }
 
         // Log the action
@@ -240,24 +284,20 @@ class ExamController extends Controller
     {
         \Log::channel('custom')->info('Review Exam called', ['attemptId' => $attemptId]);
 
-        // Fetch the attempt
+        // Fetch the attempt with exam and responses in a single query
         $attempt = Attempt::where('id', $attemptId)
             ->where('user_cid', auth()->user()->cid)
+            ->with(['exam.questions.answers', 'responses'])
             ->first();
 
         if (!$attempt) {
             return redirect()->route('dashboard')->with('error', 'The requested attempt does not exist.');
         }
 
-        // Fetch the associated exam
-        $exam = Exam::where('id', $attempt->exam_id)->with('questions.answers')->first();
+        $exam = $attempt->exam;
 
-        // Fetch responses for the specific attempt
-        $responses = Response::where('user_cid', auth()->user()->cid)
-            ->whereIn('question_id', $exam->questions->pluck('id'))
-            ->where('attempt_id', $attemptId)
-            ->get()
-            ->keyBy('question_id');
+        // Organize responses by question_id
+        $responses = $attempt->responses->keyBy('question_id');
 
         $attendedQuestionIds = $responses->keys();
         $questions = $exam->questions->whereIn('id',$attendedQuestionIds);
@@ -282,7 +322,7 @@ class ExamController extends Controller
 
     public function examSettings()
     {
-        $exams = Exam::with('questions')->get(); // Fetch all exams with their questions
+        $exams = Exam::with('questions')->get();
         return view('admin.admin-settings', compact('exams'));
     }
 
@@ -324,5 +364,47 @@ class ExamController extends Controller
         ActivityLogger::log("Settings updated by ".auth()->user()->name);
 
         return redirect()->route('admin.settings')->with('success', 'Exam settings updated successfully.');
+    }
+
+    public function startExam(Request $request, $examName)
+    {
+        $token = $this->validateExamToken($examName);
+        $exam = $token->exam()->with('questions')->firstOrFail();
+
+        // Check for existing in-progress attempt
+        $attempt = Attempt::where('user_cid', auth()->user()->cid)
+            ->where('exam_id', $exam->id)
+            ->where('status', 'in_progress')
+            ->first();
+
+        if (!$attempt) {
+            // Randomize questions ONCE
+            $categoryRatios = $exam->category_ratios ?? [];
+            $selectedQuestions = collect();
+            foreach ($categoryRatios as $category => $count) {
+                $categoryQuestions = $exam->questions->where('category', $category);
+                $selectedQuestions = $selectedQuestions->merge($categoryQuestions->shuffle()->take($count));
+            }
+            $selectedQuestions = $selectedQuestions->shuffle();
+
+            // Attempt number: only count completed attempts
+            $attemptNumber = Attempt::where('user_cid', auth()->user()->cid)
+                ->where('exam_id', $exam->id)
+                ->where('status', '!=', 'in_progress')
+                ->count() + 1;
+
+            $attempt = Attempt::create([
+                'user_cid' => auth()->user()->cid,
+                'exam_id' => $exam->id,
+                'attempt_number' => $attemptNumber,
+                'attempted_at' => now(),
+                'status' => 'in_progress',
+                'cooldown_until' => null,
+                'question_ids' => $selectedQuestions->pluck('id')->toArray(),
+            ]);
+        }
+
+        // Always redirect to takeExam with the attempt id
+        return redirect()->route('exam.take', [$examName, 'attempt' => $attempt->id]);
     }
 }

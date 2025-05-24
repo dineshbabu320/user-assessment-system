@@ -136,8 +136,10 @@
                                 <span class="text-green-500 font-bold">Passed</span>
                             @elseif($attempt->status === 'failed')
                                 <span class="text-red-500 font-bold">Failed</span>
-                            @else
+                            @elseif($attempt->status === 'waiting_for_manual_evaluation')
                                 <span class="text-yellow-500 font-bold">Waiting for evaluation</span>
+                            @else
+                                <span class="text-yellow-500 font-bold">In Progress</span>
                             @endif
                         </td>
                         <td class="px-6 py-4">{{ $attempt->score && $attempt->status!=='waiting_for_manual_evaluation' ? $attempt->score : '-' }}</td>

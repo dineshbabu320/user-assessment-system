@@ -22,11 +22,13 @@ class Attempt extends Model
         'status',
         'score',
         'cooldown_until',
+        'question_ids',
     ];
 
     protected $casts = [
         'attempted_at' => 'datetime',
         'cooldown_until' => 'datetime',
+        'question_ids' => 'array',
     ];
 
     public function user(): BelongsTo

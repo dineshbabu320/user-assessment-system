@@ -24,23 +24,29 @@ Route::middleware(['auth', Middleware::class])->group(function () {
     //DashBoard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/faq', function() { return view('faq'); })->name('faq');
+    
+    Route::middleware(['examiner'])->group( function() {
+        //Examiner stuff
+        Route::get('/examiner/manual-evaluation', [ManualEvaluationController::class, 'index'])->name('student.manualEvaluation');
+        Route::get('/examiner/manual-evaluation/{cid}', [ManualEvaluationController::class, 'show'])->name('student.manualEvaluation.show');
+        Route::post('/examiner/manual-evaluation/{cid}/evaluate-all', [ManualEvaluationController::class, 'evaluateAll'])->name('student.evaluateAll');
+    });
 
-    Route::middleware(['roleAboveStudent'])->group(function(){
+    Route::middleware(['subdivisionStaff'])->group(function(){
         //Issue Token
         Route::get('/students/search', [StudentTokenController::class, 'search'])->name('students.search');
         Route::post('/students/issue-token', [StudentTokenController::class, 'issueToken'])->name('students.issueToken');
-        Route::get('/student/manual-evaluation', [ManualEvaluationController::class, 'index'])->name('student.manualEvaluation');
-        Route::get('/student/manual-evaluation/{cid}', [ManualEvaluationController::class, 'show'])->name('student.manualEvaluation.show');
-        Route::post('/student/manual-evaluation/{cid}/evaluate-all', [ManualEvaluationController::class, 'evaluateAll'])->name('student.evaluateAll');
         Route::get('/student/{cid}', [StudentHistoryController::class, 'index'])->name('student.studentHistory');
         Route::patch('/tokens/{token}/revoke', [StudentTokenController::class, 'revokeToken'])->name('tokens.revoke');
     });
+
 
     Route::get('/my-exams', [ExamController::class, 'myExams'])->name('my-exams');
 
     Route::middleware(['hasExamToken'])->group(function () {
         //Exam routes
         Route::get('/exam/{examName}/instructions', [ExamController::class, 'instructions'])->name('exam.instructions');
+        Route::post('/exam/{examName}/start', [ExamController::class, 'startExam'])->name('exam.start');
         Route::get('/exam/{examName}', [ExamController::class, 'takeExam'])->name('exam.take');
         Route::post('/exam/{examName}/submit', [ExamController::class, 'submitExam'])->name('exam.submit');
     });
@@ -63,5 +69,6 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::get('/admin/settings', [ExamController::class, 'examSettings'])->name('admin.settings');
         Route::put('/admin/update-settings', [ExamController::class, 'updateExamSettings'])->name('admin.updateSettings');
         Route::post('/admin/questions/{id}/remove-file', [QuestionController::class, 'removeFile'])->name('admin.questions.remove-file');
+        Route::post('/admin/roles/adjust', [RoleController::class, 'adjustRoles'])->name('admin.roles.adjust');
     });
 });

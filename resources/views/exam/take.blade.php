@@ -5,6 +5,7 @@
     <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Exam: {{ $exam->name }}</h1>
     <form method="POST" action="{{ route('exam.submit', $exam->name) }}" onsubmit="return validateForm()">
         @csrf
+        <input type="hidden" name="attempt_id" value="{{ $attemptId }}">
         @foreach ($questions as $question)
             <div class="mb-8">
                 <div class="flex items-start space-x-4 mb-5">

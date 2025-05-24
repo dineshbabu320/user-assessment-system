@@ -14,7 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'hasExamToken' => \App\Http\Middleware\HasExamToken::class,
-            'roleAboveStudent' => \App\Http\Middleware\roleAboveStudent::class,
+            'subdivisionStaff' => \App\Http\Middleware\SubdivisionStaff::class,
+            'examiner' => \App\Http\Middleware\Examiner::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })

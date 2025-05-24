@@ -5,32 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Passed</title>
     <style>
-        /* General Styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9fafb; /* Light background for light mode */
-            color: #333333; /* Dark text for readability */
+            background-color: #f9fafb;
+            color: #333333;
         }
         .container {
             max-width: 600px;
             margin: 20px auto;
-            background-color: #ffffff; /* White background for light mode */
+            background-color: #ffffff;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb; /* Light border for structure */
+            border: 1px solid #e5e7eb;
         }
         .header {
-            background-color: #0ea5e9; /* Cyan color */
+            background-color: #0ea5e9;
             padding: 20px;
             text-align: center;
         }
         .header h1 {
             margin: 0;
             font-size: 24px;
-            color: #ffffff; /* White text for contrast */
+            color: #ffffff;
         }
         .content {
             padding: 20px;
@@ -38,46 +37,44 @@
         .content p {
             margin: 10px 0;
             line-height: 1.6;
-            color: #333333; /* Dark text for readability */
+            color: #333333;
         }
         .button {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
-            background-color: #0ea5e9; /* Cyan color */
-            color: #ffffff !important; /* White text */
+            background-color: #0ea5e9;
+            color: #ffffff !important;
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
             text-align: center;
         }
         .button:hover {
-            background-color: #0284c7; /* Darker cyan on hover */
+            background-color: #0284c7;
         }
         .footer {
-            background-color: #f3f4f6; /* Light gray background for footer */
+            background-color: #f3f4f6;
             padding: 10px;
             text-align: center;
             font-size: 12px;
-            color: #6b7280; /* Gray text */
+            color: #6b7280;
         }
-
-        /* Dark Mode Styles */
         @media (prefers-color-scheme: dark) {
             body {
-                background-color: #0f172a; /* Dark background for dark mode */
-                color: #ffffff; /* Light text for readability */
+                background-color: #0f172a;
+                color: #ffffff;
             }
             .container {
-                background-color: #1e293b; /* Darker background for dark mode */
-                border: 1px solid #334155; /* Dark border for structure */
+                background-color: #1e293b;
+                border: 1px solid #334155;
             }
             .content p {
-                color: #e2e8f0; /* Light text for readability */
+                color: #e2e8f0;
             }
             .footer {
-                background-color: #0f172a; /* Dark footer background */
-                color: #94a3b8; /* Light gray text */
+                background-color: #0f172a;
+                color: #94a3b8;
             }
         }
     </style>

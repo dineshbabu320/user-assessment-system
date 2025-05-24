@@ -13,16 +13,13 @@ use Parsedown;
 
 class ManualEvaluationController extends Controller
 {
+    private const adminEmail = 'js.hoo@vat-sea.com';
+
     // List students with pending evaluations
     public function index()
     {
         $students = User::whereHas('responses', function ($query) {
-            $query->where('status', 'pending')
-                ->when(!auth()->user()->isAdmin(), function ($query) {
-                    $query->whereHas('user', function ($subQuery) {
-                        $subQuery->where('subdivision_id', auth()->user()->subdivision_id);
-                    });
-                });
+            $query->where('status', 'pending');
         })->withCount(['responses as pending_evaluations' => function ($query) {
             $query->where('status', 'pending');
         }])->paginate(10);
@@ -33,11 +30,7 @@ class ManualEvaluationController extends Controller
     // Show pending evaluations for a specific student
     public function show($cid)
     {
-        $student = User::where('cid', $cid)
-            ->when(!auth()->user()->isAdmin(), function ($query) {
-                $query->where('subdivision_id', auth()->user()->subdivision_id);
-            })
-            ->firstOrFail();
+        $student = User::where('cid', $cid)->firstOrFail();
 
         $responses = Response::where('user_cid', $cid)
             ->where('status', 'pending')
@@ -99,15 +92,13 @@ class ManualEvaluationController extends Controller
         if ($status === 'passed') {
             $user = auth()->user();
             $exam = $attempt->exam;
-    
-            // Get admin and subdivision directors
-            $adminEmail = 'js.hoo@vat-sea.com';
+
             $subdivisionDirectors = User::where('role_id', 2)
                 ->where('subdivision_id', $user->subdivision_id)
                 ->pluck('email')
                 ->toArray();
     
-            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+            Mail::to($subdivisionDirectors)->bcc(self::adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
         }
 
         // Log the action
@@ -173,15 +164,13 @@ class ManualEvaluationController extends Controller
         if ($status === 'passed') {
             $user = auth()->user();
             $exam = $attempt->exam;
-    
-            // Get admin and subdivision directors
-            $adminEmail = 'js.hoo@vat-sea.com';
+
             $subdivisionDirectors = User::where('role_id', 2)
                 ->where('subdivision_id', $user->subdivision_id)
                 ->pluck('email')
                 ->toArray();
             
-            Mail::to($subdivisionDirectors)->bcc($adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+            Mail::to($subdivisionDirectors)->bcc(self::adminEmail)->queue(new ExamPassedNotification($user, $exam, $totalScore));
         }
 
         // Log the action

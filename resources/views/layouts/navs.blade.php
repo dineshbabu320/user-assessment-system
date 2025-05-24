@@ -77,7 +77,7 @@
                <span class="flex-1 ms-3 whitespace-nowrap">My Exams</span>
             </a>
          </li>
-         @if(auth()->user()->role_id>1)
+         @if(auth()->user()->isSubdivisionStaff() || auth()->user()->isAdmin())
             <li>
                <a href="{{ route('students.search') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -87,7 +87,7 @@
                </a>
             </li>
          @endif
-         @if(auth()->user()->role_id>1)
+         @if(auth()->user()->isExaminer() || auth()->user()->isAdmin())
             <li>
                <a href="{{ route('student.manualEvaluation') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@
                </a>
             </li>
          @endif
-         @if(auth()->user()->role_id==3)
+         @if(auth()->user()->isAdmin())
             <li>
                <a href="{{ route('admin.questions.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -107,7 +107,7 @@
                </a>
             </li>
          @endif
-         @if(auth()->user()->role_id==3)
+         @if(auth()->user()->isAdmin())
             <li>
                <a href="{{ route('admin.activity-log' ) }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@
                </a>
             </li>
          @endif
-         @if(auth()->user()->role_id==3)
+         @if(auth()->user()->isAdmin())
             <li>
                <a href="{{ route('admin.roles.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -137,11 +137,11 @@
          </li>
       </ul>
       <!-- Footer Section -->
-      <div class="absolute bottom-0 left-0 w-full p-4 bg-gray-100 dark:bg-gray-800">
-         <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
-            Developed by <a href="https://github.com/dineshbabu320" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">Dinesh Babu</a>
+      <div class="absolute bottom-0 left-0 w-full p-4 bg-white dark:bg-gray-800">
+         <p class="text-sm text-black dark:text-gray-400 text-center italic">
+            Developed by <b class="text-sky-400">Dinesh Babu</b>
          </p>
-         <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
+         <p class="text-sm text-black dark:text-gray-400 text-center mt-1">
             &copy; {{ date('Y') }} SEA-TEST. All rights reserved.
          </p>
       </div>

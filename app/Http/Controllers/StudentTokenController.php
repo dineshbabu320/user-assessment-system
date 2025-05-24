@@ -9,7 +9,7 @@ use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TokenIssuedMail;
-use App\Models\Attempt; // Add this import if not already present
+use App\Models\Attempt;
 use App\Helpers\ActivityLogger;
 
 class StudentTokenController extends Controller
@@ -19,13 +19,13 @@ class StudentTokenController extends Controller
     {
         $query = $request->input('query');
 
-        // Fetch students based on name and limit by subdivision if the user is a Subdivision Director
-        $students = User::select('cid', 'name', 'email', 'subdivision_id') // Specify the columns to retrieve
+        // Fetch students based on name and limit by subdivision if the user is a Subdivision Staff
+        $students = User::select('cid', 'name', 'email', 'subdivision_id') 
             ->where('name', 'LIKE', "%{$query}%")
-            ->when(Auth::user()->role->name === 'Subdivision Director', function ($q) {
+            ->when(Auth::user()->isSubdivisionStaff(), function ($q) {
                 $q->where('subdivision_id', Auth::user()->subdivision_id);
             })
-            ->paginate(10); // Paginate results (10 per page)
+            ->paginate(10);
 
         return view('students.search', compact('students'));
     }
@@ -52,7 +52,7 @@ class StudentTokenController extends Controller
         // }
 
         $tokenId = $request->input('token_id');
-        $examId = substr($tokenId, strrpos($tokenId, '-') + 1); // Get the part after the last '-'
+        $examId = substr($tokenId, strrpos($tokenId, '-') + 1);
 
         // Ensure the exam_id exists in the exams table
         $exam = Exam::where('name', $examId)->first();
@@ -61,7 +61,7 @@ class StudentTokenController extends Controller
         }
 
         // Ensure subdivision directors can issue only within their subdivision
-        if ($user->roleAboveStudent() && $user->isSubdivisionDirector()) {
+        if ($user->isSubdivisionStaff()) {
             if ($user->subdivision_id !== Auth::user()->subdivision_id) {
                 return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
             }
@@ -77,7 +77,6 @@ class StudentTokenController extends Controller
 
         Mail::to($user->email)->queue(new TokenIssuedMail($token));
 
-        // Log the action
         ActivityLogger::log("Issued token '{$tokenId}' for {$user->name} (CID: {$user->cid}) by " . auth()->user()->name);
 
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");
@@ -92,10 +91,8 @@ class StudentTokenController extends Controller
             return redirect()->back()->with('error', 'This token is already revoked.');
         }
 
-        // Update the token status to revoked
         $token->update(['status' => 'revoked']);
 
-        // Log the action
         ActivityLogger::log("Revoked token '{$token->id}' for {$token->user_cid} by " . auth()->user()->name);
 
         return redirect()->back()->with('success', "Token ID {$token->id} has been successfully revoked.");

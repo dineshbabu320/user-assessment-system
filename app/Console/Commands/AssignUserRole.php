@@ -2,6 +2,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Console\Command;
 
 class AssignUserRole extends Command
@@ -11,37 +12,39 @@ class AssignUserRole extends Command
      *
      * @var string
      */
-    protected $signature = 'user:assign-role {user_id} {role_id}';
+    protected $signature = 'user:assign-role {user_cid} {role_id}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Assign a role to a user by updating the role_id field in the users table';
+    protected $description = 'Assign a role to a user using the pivot table';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        // Get the input arguments
-        $userId = $this->argument('user_id');
+        $userCid = $this->argument('user_cid');
         $roleId = $this->argument('role_id');
 
-        // Find the user by ID
-        $user = User::find($userId);
+        $user = User::where('cid', $userCid)->first();
+        $role = Role::find($roleId);
 
         if (!$user) {
-            $this->error("User with ID {$userId} not found.");
-            return 1; // Return error code
+            $this->error("User with CID {$userCid} not found.");
+            return 1;
+        }
+        if (!$role) {
+            $this->error("Role with ID {$roleId} not found.");
+            return 1;
         }
 
-        // Update the user's role_id
-        $user->role_id = $roleId;
-        $user->save();
+        // Attach role, no duplicate
+        $user->roles()->syncWithoutDetaching([$roleId]);
 
-        $this->info("Role ID {$roleId} has been assigned to user with ID {$userId}.");
-        return 0; // Return success code
+        $this->info("Role '{$role->name}' (ID {$roleId}) assigned to user {$user->name} (CID {$userCid}).");
+        return 0;
     }
 }

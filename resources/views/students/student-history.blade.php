@@ -53,7 +53,7 @@
                                         <form action="{{ route('tokens.revoke', $token->token_instance_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to revoke this token?');">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="px-4 py-2 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Revoke</button>
+                                            <button type="submit" class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Revoke</button>
                                         </form>
                                     @endif
                                 </td>
@@ -91,22 +91,24 @@
                     <tbody>
                         @foreach ($attempts as $attempt)
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-6 py-4">{{ $attempt->exam->name }}</td>
-                                <td class="px-6 py-4">{{ $attempt->score ?? 'N/A' }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->exam->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->score ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     @if ($attempt->status === 'passed')
                                         <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Passed</span>
                                     @elseif ($attempt->status === 'failed')
                                         <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Failed</span>
-                                    @else
+                                    @elseif($attempt->status === 'waiting_for_manual_evaluation')
                                         <span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded dark:bg-yellow-900 dark:text-yellow-300">Waiting for Evaluation</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded dark:bg-yellow-900 dark:text-yellow-300">In Progress</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
                                 @if (auth()->user()->isAdmin())
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" 
-                                        class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm">
+                                           class="block sm:inline-block w-full sm:w-auto text-center px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm cursor-pointer">
                                             Manually Evaluate
                                         </a>
                                     </td>

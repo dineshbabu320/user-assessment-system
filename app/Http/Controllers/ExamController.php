@@ -262,9 +262,10 @@ class ExamController extends Controller
             $user = auth()->user();
             $exam = $attempt->exam;
 
-            // Get admin and subdivision directors
-            $subdivisionDirectors = User::where('role_id', 2)
-                ->where('subdivision_id', $user->subdivision_id)
+            $subdivisionDirectors = User::where('subdivision_id', $user->subdivision_id)
+                ->whereHas('roles', function ($q) {
+                    $q->where('id', 2);
+                })
                 ->pluck('email')
                 ->toArray();
 

@@ -12,7 +12,15 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->paginate(10); // show roles
+        $currentCid = auth()->user()->cid;
+
+        $users = User::where('cid', '!=', $currentCid)
+            ->whereHas('roles', function ($q) {
+                $q->where('roles.id', '!=', 1);
+            })
+            ->with('roles')
+            ->paginate(10);
+
         $roles = Role::all();
         return view('admin.rolecontrol', compact('users', 'roles'));
     }

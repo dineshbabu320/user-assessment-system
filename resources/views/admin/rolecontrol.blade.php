@@ -57,35 +57,33 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                    @php
-                        $nonStudentRoles = $user->roles->filter(fn($role) => $role->id != 1);
-                    @endphp
-                    @if ($nonStudentRoles->count())
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4">{{ $user->name }}</td>
-                            <td class="px-6 py-4">{{ $user->cid }}</td>
-                            <td class="px-6 py-4">{{ $user->email }}</td>
-                            <td class="px-6 py-4">
-                                {{ $nonStudentRoles->pluck('name')->join(', ') }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <!-- Edit button in table -->
-                                <button
-                                    data-modal-target="roleModal"
-                                    data-modal-toggle="roleModal"
-                                    type="button"
-                                    class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 cursor-pointer"
-                                    data-cid="{{ $user->cid }}"
-                                    data-roles="{{ $user->roles->pluck('id')->implode(',') }}"
-                                >
-                                    Edit
-                                </button>
-                            </td>
-                        </tr>
-                    @endif
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <td class="px-6 py-4">{{ $user->name }}</td>
+                        <td class="px-6 py-4">{{ $user->cid }}</td>
+                        <td class="px-6 py-4">{{ $user->email }}</td>
+                        <td class="px-6 py-4">
+                            {{ $user->roles()->pluck('name')->join(', ') }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <!-- Edit button in table -->
+                            <button
+                                data-modal-target="roleModal"
+                                data-modal-toggle="roleModal"
+                                type="button"
+                                class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 cursor-pointer"
+                                data-cid="{{ $user->cid }}"
+                                data-roles="{{ $user->roles->pluck('id')->implode(',') }}"
+                            >
+                                Edit
+                            </button>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
+    </div>
+    <div class="mt-4">
+        {{ $users->links('vendor.pagination.flowbite') }}
     </div>
 </div>
 

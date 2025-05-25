@@ -77,6 +77,7 @@ class QuestionController extends Controller
             'points' => 'required|integer|min:1',
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
+            'answer_key' => 'nullable|string',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf', 
             'category' => 'required|string|max:255',
         ]);
@@ -107,23 +108,37 @@ class QuestionController extends Controller
             'points' => $request->points,
             'correct_comment' => $request->correct_comment,
             'wrong_comment' => $request->wrong_comment,
+            'answer_key' => $request->answer_key,
             'file_path' => $filePath,
             'category' => $request->category,
         ]);
 
         \Log::channel('custom')->info('Question updated:', $question->toArray());
 
-        $question->answers()->delete();
-
         if (in_array($request->question_type, ['mcq', 'single']) && $options) {
+            // Fetch existing answers and index by answer_text
+            $existingAnswers = $question->answers()->get()->keyBy('answer_text');
+            $updatedAnswerTexts = [];
+
             foreach ($options as $option) {
-                $answer = Answer::create([
-                    'question_id' => $question->id,
-                    'answer_text' => $option,
-                    'is_correct' => $correctAnswers && in_array($option, $correctAnswers),
-                ]);
-                \Log::channel('custom')->info('Answer created:', $answer->toArray());
+                $isCorrect = $correctAnswers && in_array($option, $correctAnswers);
+
+                if ($existingAnswers->has($option)) {
+                    $answer = $existingAnswers->get($option);
+                    $answer->update(['is_correct' => $isCorrect]);
+                    \Log::channel('custom')->info('Answer updated:', $answer->toArray());
+                } else {
+                    $answer = Answer::create([
+                        'question_id' => $question->id,
+                        'answer_text' => $option,
+                        'is_correct' => $isCorrect,
+                    ]);
+                    \Log::channel('custom')->info('Answer created:', $answer->toArray());
+                }
+                $updatedAnswerTexts[] = $option;
             }
+
+            $question->answers()->whereNotIn('answer_text', $updatedAnswerTexts)->delete();
         }
 
         ActivityLogger::log("Updated question '{$question->id}' for exam {$question->exam->name} by " . auth()->user()->name);
@@ -144,6 +159,7 @@ class QuestionController extends Controller
             'points' => 'required|integer|min:1',
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
+            'answer_key' => 'nullable|string',
             'additional_exams' => 'nullable|array',
             'additional_exams.*' => 'exists:exams,id',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf', 
@@ -172,6 +188,7 @@ class QuestionController extends Controller
             'points' => $request->points,
             'correct_comment' => $request->correct_comment,
             'wrong_comment' => $request->wrong_comment,
+            'answer_key' => $request->answer_key,
             'file_path' => $filePath,
             'category' => $request->category,
         ]);
@@ -201,6 +218,7 @@ class QuestionController extends Controller
                     'points' => $request->points, 
                     'correct_comment' => $request->correct_comment,
                     'wrong_comment' => $request->wrong_comment,
+                    'answer_key' => $request->answer_key,
                     'file_path' => $filePath,
                     'category' => $request->category,
                 ]);

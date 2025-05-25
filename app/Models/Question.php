@@ -19,6 +19,7 @@ class Question extends Model
         'points',
         'correct_comment',
         'wrong_comment', 
+        'answer_key',
         'file_path',
         'category'
     ];

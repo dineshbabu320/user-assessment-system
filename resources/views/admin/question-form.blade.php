@@ -449,6 +449,13 @@
             <textarea name="wrong_comment" id="wrong_comment" rows="2" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{{ old('wrong_comment', $question->wrong_comment ?? '') }}</textarea>
         </div>
 
+        @if(old('question_type', $question->question_type ?? '') === 'text')
+            <div class="mb-4">
+                <label for="answer_key" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Answer Key</label>
+                <textarea name="answer_key" id="answer_key" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{{ old('answer_key', $question->answer_key ?? '') }}</textarea>
+            </div>
+        @endif
+
         <!-- Points -->
         <div class="mb-4">
             <label for="points" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Points <span class="text-red-500">*</span></label>

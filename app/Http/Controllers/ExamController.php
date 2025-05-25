@@ -284,23 +284,28 @@ class ExamController extends Controller
     {
         \Log::channel('custom')->info('Review Exam called', ['attemptId' => $attemptId]);
 
-        // Fetch the attempt with exam and responses in a single query
         $attempt = Attempt::where('id', $attemptId)
-            ->where('user_cid', auth()->user()->cid)
-            ->with(['exam.questions.answers', 'responses'])
+            ->with(['exam.questions.answers', 'responses', 'user'])
             ->first();
 
         if (!$attempt) {
             return redirect()->route('dashboard')->with('error', 'The requested attempt does not exist.');
         }
 
+        $currentUser = auth()->user();
+
+        $isOwner = $attempt->user_cid === $currentUser->cid;
+        $isSubdivisionStaff = $currentUser->isSubdivisionStaff() && $currentUser->subdivision_id === $attempt->user->subdivision_id;
+        $isAdmin = $currentUser->isAdmin();
+
+        if (!($isOwner || $isSubdivisionStaff || $isAdmin)) {
+            return redirect()->route('dashboard')->with('error', 'You are not authorized to view this review.');
+        }
+
         $exam = $attempt->exam;
-
-        // Organize responses by question_id
         $responses = $attempt->responses->keyBy('question_id');
-
         $attendedQuestionIds = $responses->keys();
-        $questions = $exam->questions->whereIn('id',$attendedQuestionIds);
+        $questions = $exam->questions->whereIn('id', $attendedQuestionIds);
 
         $parsedown = new Parsedown();
         foreach ($questions as $question) {

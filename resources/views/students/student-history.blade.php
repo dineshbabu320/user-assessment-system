@@ -83,6 +83,9 @@
                             <th scope="col" class="px-6 py-3">Score</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3">Attempt Date</th>
+                            @if (auth()->user()->isSubdivisionStaff() || auth()->user()->isAdmin())
+                                <th scope="col" class="px-6 py-3">Review</th>
+                            @endif
                             @if (auth()->user()->isAdmin())
                                 <th scope="col" class="px-6 py-3">Action</th>
                             @endif
@@ -105,6 +108,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->attempted_at->format('Y-m-d') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="{{ route('exam.review', $attempt->id) }}" class="text-blue-400">Review</a>
+                                </td>
                                 @if (auth()->user()->isAdmin())
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <a href="{{ route('manual-evaluation-admin.show', $attempt->id) }}" 

@@ -20,12 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'atc_rating',
-        'role_id',
         'subdivision_id',
-    ];
-
-    protected $casts = [
-        'secondary_role_ids' => 'array',
     ];
 
     public function tokens() {

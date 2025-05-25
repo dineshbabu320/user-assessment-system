@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->integer('atc_rating');
-            $table->foreignId('role_id')->constrained('roles');
             $table->string('subdivision_id');
             $table->timestamps();
         });

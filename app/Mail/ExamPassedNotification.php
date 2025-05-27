@@ -12,20 +12,23 @@ class ExamPassedNotification extends Mailable
 
     public $user;
     public $exam;
-    public $score;
+    public $percentage;
+    public $attempt_number;
 
     /**
      * Create a new message instance.
      *
      * @param $user
      * @param $exam
-     * @param $score
+     * @param $percentage
+     * @param $attempt_number
      */
-    public function __construct($user, $exam, $score)
+    public function __construct($user, $exam, $percentage, $attempt_number)
     {
         $this->user = $user;
         $this->exam = $exam;
-        $this->score = $score;
+        $this->percentage = $percentage;
+        $this->attempt_number = $attempt_number;
     }
 
     /**
@@ -40,7 +43,8 @@ class ExamPassedNotification extends Mailable
                     ->with([
                         'user' => $this->user,
                         'exam' => $this->exam,
-                        'score' => $this->score,
+                        'percentage' => $this->percentage,
+                        'attempt_number' => $this->attempt_number,
                     ]);
     }
 }

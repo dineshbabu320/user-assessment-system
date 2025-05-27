@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Parsedown;
 use App\Mail\ExamPassedNotification;
+use App\Mail\ExamFailedNotification;
 use Illuminate\Support\Facades\Mail;
 use App\Helpers\ActivityLogger;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -213,14 +214,6 @@ class ExamController extends Controller
 
         $limitedQuestionIds = $attempt->question_ids ?? [];
 
-        // Check previous attempts
-        $previousAttempts = Attempt::where('user_cid', auth()->user()->cid)
-            ->where('exam_id', $exam->id)
-            ->orderBy('attempt_number', 'desc')
-            ->get();
-
-        $attemptNumber = $previousAttempts->count() + 1;
-
         $totalScore = 0;
         $maxScore = $exam->questions->whereIn('id', $limitedQuestionIds)->sum('points'); // Sum of points for limited questions
         $hasPendingEvaluation = false;
@@ -251,7 +244,7 @@ class ExamController extends Controller
         // Update the attempt with the final status and score
         $attempt->update([
             'status' => $status,
-            'cooldown_until' => $status === 'failed' ? now()->addDays($attempt->attempt_number * 7) : null,
+            'cooldown_until' => $status === 'failed' ? now()->addDays(3) : null,
             'score' => $totalScore,
         ]);
 
@@ -269,7 +262,29 @@ class ExamController extends Controller
                 ->pluck('email')
                 ->toArray();
 
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $totalScore));
+            $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
+
+            $attempt_number = $attempt->attempt_number;
+            
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
+        }
+
+        if ($status === 'failed') {
+            $user = auth()->user();
+            $exam = $attempt->exam;
+
+            $subdivisionDirectors = User::where('subdivision_id', $user->subdivision_id)
+                ->whereHas('roles', function ($q) {
+                    $q->where('id', 2);
+                })
+                ->pluck('email')
+                ->toArray();
+
+            $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
+
+            $attempt_number = $attempt->attempt_number;
+            
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
         }
 
         // Log the action

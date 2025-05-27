@@ -22,7 +22,7 @@
             border: 1px solid #e5e7eb;
         }
         .header {
-            background-color: #0ea5e9;
+            background-color: #00bf16;
             padding: 20px;
             text-align: center;
         }
@@ -43,7 +43,7 @@
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
-            background-color: #0ea5e9;
+            background-color: #00bf16;
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 4px;
@@ -90,7 +90,8 @@
             <p><strong>Name:</strong> {{ $user->name }}</p>
             <p><strong>CID:</strong> {{ $user->cid }}</p>
             <p><strong>Exam:</strong> {{ $exam->name }}</p>
-            <p><strong>Score:</strong> {{ $score }}</p>
+            <p><strong>Attempt:</strong> {{ $attempt_number }}</p>
+            <p><strong>Percentage:</strong> {{ $percentage }}%</p>
             <a href="{{ url('/') }}" class="button">Visit Dashboard</a>
         </div>
         <div class="footer">

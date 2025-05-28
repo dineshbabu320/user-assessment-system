@@ -86,7 +86,7 @@
         </div>
         <div class="content">
             <p>Dear Admin/Subdivision Directors,</p>
-            <p>The following user has successfully failed an exam:</p>
+            <p>The following user has failed an exam:</p>
             <p><strong>Name:</strong> {{ $user->name }}</p>
             <p><strong>CID:</strong> {{ $user->cid }}</p>
             <p><strong>Exam:</strong> {{ $exam->name }}</p>

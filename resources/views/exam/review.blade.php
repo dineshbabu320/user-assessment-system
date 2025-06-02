@@ -31,12 +31,14 @@
                     @endif
                 </h2>
             </div>
-            <div>
-                <h2 class="text-gray-900 dark:text-white">
-                    Total Score: {{ $totalScore }}/{{ $maxScore }} 
-                    ({{ $maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0 }}%)
-                </h2>
-            </div>
+            @if ($attempt->status !== 'waiting_for_manual_evaluation')
+                <div>
+                    <h2 class="text-gray-900 dark:text-white">
+                        Total Score: {{ $totalScore }}/{{ $maxScore }} 
+                        ({{ $maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0 }}%)
+                    </h2>
+                </div>
+            @endif
         </div>
         <hr class="h-px my-6 bg-black border-0 dark:bg-white">
         @foreach ($questions as $question)

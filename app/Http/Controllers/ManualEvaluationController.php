@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ExamCompletedNotification;
 use App\Mail\ExamFailedNotification;
 use App\Models\Response;
 use App\Models\User;
@@ -91,39 +92,51 @@ class ManualEvaluationController extends Controller
         ]);
 
         if ($status === 'passed') {
-            $user = auth()->user();
             $exam = $attempt->exam;
+            $student = $attempt->user;
 
             $subdivisionDirectors = User::whereHas('roles', function ($query) {
                     $query->where('id', 2);
                 })
-                ->where('subdivision_id', $user->subdivision_id)
+                ->where('subdivision_id', $student->subdivision_id)
                 ->pluck('email')
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
     
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Evaluated";
+
+            $customMessage = "Dear {$student->name},<br><br>Your exam has been evaluated by our staff.";
+
+            Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($student, $exam, $percentage, $attempt_number));
         }
 
         if ($status === 'failed') {
-            $user = auth()->user();
             $exam = $attempt->exam;
+            $student = $attempt->user;
 
             $subdivisionDirectors = User::whereHas('roles', function ($query) {
                     $query->where('id', 2);
                 })
-                ->where('subdivision_id', $user->subdivision_id)
+                ->where('subdivision_id', $student->subdivision_id)
                 ->pluck('email')
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
 
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Evaluated";
+
+            $customMessage = "Dear {$student->name},<br><br>Your exam has been evaluated by our staff.";
+
+            Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($student, $exam, $percentage, $attempt_number));
         }
 
         // Log the action
@@ -187,39 +200,51 @@ class ManualEvaluationController extends Controller
         ]);
 
         if ($status === 'passed') {
-            $user = auth()->user();
             $exam = $attempt->exam;
+            $student = $attempt->user;
 
             $subdivisionDirectors = User::whereHas('roles', function ($query) {
                     $query->where('id', 2);
                 })
-                ->where('subdivision_id', $user->subdivision_id)
+                ->where('subdivision_id', $student->subdivision_id)
                 ->pluck('email')
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
             
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Evaluated";
+
+            $customMessage = "Dear {$student->name},<br><br>Your exam has been evaluated by our staff.";
+
+            Mail::to($student->email)->queue(new ExamCompletedNotification($status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($student, $exam, $percentage, $attempt_number));
         }
 
         if ($status === 'failed') {
-            $user = auth()->user();
             $exam = $attempt->exam;
+            $student = $attempt->user;
 
             $subdivisionDirectors = User::whereHas('roles', function ($query) {
                     $query->where('id', 2);
                 })
-                ->where('subdivision_id', $user->subdivision_id)
+                ->where('subdivision_id', $student->subdivision_id)
                 ->pluck('email')
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
             
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Evaluated";
+
+            $customMessage = "Dear {$student->name},<br><br>Your exam has been evaluated by our staff.";
+
+            Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($student, $exam, $percentage, $attempt_number));
         }
 
         // Log the action

@@ -86,7 +86,7 @@
         </div>
         <div class="content">
             <p>Dear {{ $token->user->name }},</p>
-            <p>We are pleased to inform you that a token has been issued for the <strong>{{ $token->exam->name }}</strong> exam.</p>
+            <p>You have been issued a token for the <strong>{{ $token->exam->name }}</strong> exam.</p>
             <p>The token is valid until <strong>{{ $token->expires_at->format('F j, Y') }}</strong>. Please ensure that you complete the exam before the expiry date.</p>
             <p>If you have any questions or need assistance, feel free to contact us.</p>
             <a href="{{ route('exam.take', $token->exam->name) }}" class="button">Start Exam</a>

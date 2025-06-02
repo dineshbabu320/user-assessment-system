@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Parsedown;
 use App\Mail\ExamPassedNotification;
 use App\Mail\ExamFailedNotification;
+use App\Mail\ExamCompletedNotification;
 use Illuminate\Support\Facades\Mail;
 use App\Helpers\ActivityLogger;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -265,11 +266,17 @@ class ExamController extends Controller
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
 
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Completed";
+
+            $customMessage = "Dear {$user->name}, your exam submission for exam {$exam->name} has been received";
+
+            Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
             Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
         }
 
-        if ($status === 'failed') {
+        else if ($status === 'failed') {
             $user = auth()->user();
             $exam = $attempt->exam;
 
@@ -283,8 +290,24 @@ class ExamController extends Controller
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
 
             $attempt_number = $attempt->attempt_number;
+
+            $title = "Exam Completed";
+
+            $customMessage = "Dear {$user->name}, your exam submission for exam {$exam->name} has been received";
+
+            Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
             Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
+        }
+
+        else {
+            $user = auth()->user();
+
+            $title = "Exam Completed";
+
+            $customMessage = "Dear {$user->name}, your exam submission for exam {$exam->name} has been received";
+
+            Mail::to($user->email)->queue(new ExamCompletedNotification( $status, null, $title, $customMessage));
         }
 
         // Log the action

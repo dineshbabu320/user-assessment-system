@@ -87,8 +87,8 @@
         <div class="content">
             <p>Dear Admin/Subdivision Directors,</p>
             <p>The following user has passed an exam:</p>
-            <p><strong>Name:</strong> {{ $user->name }}</p>
-            <p><strong>CID:</strong> {{ $user->cid }}</p>
+            <p><strong>Name:</strong> {{ $student->name }}</p>
+            <p><strong>CID:</strong> {{ $student->cid }}</p>
             <p><strong>Exam:</strong> {{ $exam->name }}</p>
             <p><strong>Attempt:</strong> {{ $attempt_number }}</p>
             <p><strong>Percentage:</strong> {{ $percentage }}%</p>

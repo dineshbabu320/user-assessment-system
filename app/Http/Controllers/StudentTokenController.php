@@ -61,7 +61,7 @@ class StudentTokenController extends Controller
         }
 
         // Ensure subdivision directors can issue only within their subdivision
-        if ($user->isSubdivisionStaff()) {
+        if (Auth::user()->isSubdivisionStaff()) {
             if ($user->subdivision_id !== Auth::user()->subdivision_id) {
                 return redirect()->back()->with('error', 'You can only issue tokens within your subdivision.');
             }

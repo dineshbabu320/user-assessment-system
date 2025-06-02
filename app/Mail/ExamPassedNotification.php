@@ -10,7 +10,7 @@ class ExamPassedNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $student;
+    public $user;
     public $exam;
     public $percentage;
     public $attempt_number;
@@ -18,14 +18,14 @@ class ExamPassedNotification extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param $student
+     * @param $user
      * @param $exam
      * @param $percentage
      * @param $attempt_number
      */
-    public function __construct($student, $exam, $percentage, $attempt_number)
+    public function __construct($user, $exam, $percentage, $attempt_number)
     {
-        $this->student = $student;
+        $this->user = $user;
         $this->exam = $exam;
         $this->percentage = $percentage;
         $this->attempt_number = $attempt_number;
@@ -41,7 +41,7 @@ class ExamPassedNotification extends Mailable
         return $this->subject('Exam Passed Notification')
                     ->view('emails.exam_passed_notification')
                     ->with([
-                        'student' => $this->student,
+                        'user' => $this->user,
                         'exam' => $this->exam,
                         'percentage' => $this->percentage,
                         'attempt_number' => $this->attempt_number,

@@ -43,7 +43,7 @@ class ExamFailedNotification extends Mailable
                     ->with([
                         'student' => $this->student,
                         'exam' => $this->exam,
-                        'score' => $this->percentage,
+                        'percentage' => $this->percentage,
                         'attempt_number' => $this->attempt_number,
                     ]);
     }

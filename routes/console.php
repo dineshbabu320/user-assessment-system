@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('tokens:expire')->everyMinute();
+Schedule::command('clear:audit-logs')->daily();

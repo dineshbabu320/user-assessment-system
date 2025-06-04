@@ -34,10 +34,17 @@ Route::middleware(['auth', Middleware::class])->group(function () {
 
     Route::middleware(['subdivisionStaff'])->group(function(){
         //Issue Token
-        Route::get('/students/search', [StudentTokenController::class, 'search'])->name('students.search');
+        Route::get('/students/search', [StudentTokenController::class, 'index'])->name('students.search');
         Route::post('/students/issue-token', [StudentTokenController::class, 'issueToken'])->name('students.issueToken');
         Route::get('/student/{cid}', [StudentHistoryController::class, 'index'])->name('student.studentHistory');
         Route::patch('/tokens/{token}/revoke', [StudentTokenController::class, 'revokeToken'])->name('tokens.revoke');
+        Route::get('/students/find', [StudentTokenController::class, 'search'])->name('students.find');
+    });
+
+    Route::middleware(['mentor'])->group(function() {
+        Route::get('/mentor/students/search', [StudentTokenController::class, 'index'])->name('mentor.studentSearch');
+        Route::get('/mentor/student/{cid}', [StudentHistoryController::class, 'index'])->name('mentor.studentHistory');
+        Route::get('/mentor/students/find', [StudentTokenController::class, 'search'])->name('mentors.find');
     });
 
 

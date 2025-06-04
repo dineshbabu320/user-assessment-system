@@ -15,17 +15,34 @@ use App\Helpers\ActivityLogger;
 class StudentTokenController extends Controller
 {
     // Student Search Page
-    public function search(Request $request)
+    public function index()
     {
-        $query = $request->input('query');
-
-        // Fetch students based on name and limit by subdivision if the user is a Subdivision Staff
-        $students = User::select('cid', 'name', 'email', 'subdivision_id') 
-            ->where('name', 'LIKE', "%{$query}%")
-            ->when(Auth::user()->isSubdivisionStaff(), function ($q) {
+        $students = User::select('cid', 'name', 'subdivision_name') 
+            ->when(Auth::user()->isSubdivisionStaff() || Auth::user()->isMentor(), function ($q) {
                 $q->where('subdivision_id', Auth::user()->subdivision_id);
             })
             ->paginate(10);
+
+        return view('students.search', compact('students'));
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $students = collect();
+
+        if ($query) {
+            $students = User::query()
+                ->when(Auth::user()->isSubdivisionStaff() || Auth::user()->isMentor(), function ($q) {
+                    $q->where('subdivision_id', Auth::user()->subdivision_id);
+                })
+                ->when(is_numeric($query), function($q) use ($query) {
+                    $q->where('cid', $query);
+                }, function($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%");
+                })
+                ->paginate(10);
+        }
 
         return view('students.search', compact('students'));
     }

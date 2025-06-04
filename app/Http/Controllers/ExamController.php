@@ -334,7 +334,7 @@ class ExamController extends Controller
         $currentUser = auth()->user();
 
         $isOwner = $attempt->user_cid === $currentUser->cid;
-        $isSubdivisionStaff = $currentUser->isSubdivisionStaff() && $currentUser->subdivision_id === $attempt->user->subdivision_id;
+        $isSubdivisionStaff = ($currentUser->isSubdivisionStaff() || $currentUser->isMentor()) && $currentUser->subdivision_id === $attempt->user->subdivision_id;
         $isAdmin = $currentUser->isAdmin();
 
         if (!($isOwner || $isSubdivisionStaff || $isAdmin)) {

@@ -38,14 +38,12 @@
     @endif
     <!-- Cards Row -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Current Rating Card -->
         <div class="flex justify-between items-center p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700 dark:shadow-md">
             <div>
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Current Rating</h5>
                 <p class="font-normal text-gray-700 dark:text-gray-400">{{ $user_rating['long'] }} ({{ $user_rating['short'] }})</p>
             </div>
             <div>
-                <!-- Placeholder for Icon -->
                 <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                     <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
                 </svg>
@@ -64,7 +62,6 @@
                 @endif
             </div>
             <div>
-                <!-- Updated SVG -->
                 <svg class="w-[35px] h-[35px] text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor">
                     <g>
                         <g>
@@ -99,7 +96,6 @@
                 <p class="font-normal text-gray-700 dark:text-gray-400">{{ $subdivisionName }} ({{ $subdivisionID }})</p>
             </div>
             <div>
-                <!-- Placeholder for Icon -->
                 <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0 0v6M9.5 9A2.5 2.5 0 0 1 12 6.5"/>
                 </svg>
@@ -107,16 +103,63 @@
         </div>
     </div>
 
+    @if($recentAttempts->count())
+        <div class="relative overflow-x-auto shadow-xl">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-white uppercase bg-cyan-900 dark:bg-cyan-900 dark:text-white">
+                    <tr>
+                        <th colspan="6" class="px-6 py-3 text-lg">Recent Exam Attempts (Last 7 days)</th>
+                    </tr>
+                </thead>
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
+                    <tr>
+                        <th class="px-6 py-3">Student</th>
+                        <th class="px-6 py-3">Exam</th>
+                        <th class="px-6 py-3">Date</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3">Score</th>
+                        <th class="px-6 py-3">Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentAttempts as $attempt)
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4">{{ $attempt->user->name ?? '-' }} ({{ $attempt->user_cid }})</td>
+                            <td class="px-6 py-4">{{ $attempt->exam->name ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $attempt->attempted_at ? $attempt->attempted_at->format('Y-m-d') : '-' }}</td>
+                            <td class="px-6 py-4">
+                                @if($attempt->status === 'passed')
+                                    <span class="text-green-500 font-bold">Passed</span>
+                                @elseif($attempt->status === 'failed')
+                                    <span class="text-red-500 font-bold">Failed</span>
+                                @elseif($attempt->status === 'waiting_for_manual_evaluation')
+                                    <span class="text-yellow-500 font-bold">Waiting for evaluation</span>
+                                @else
+                                    <span class="text-yellow-500 font-bold">In Progress</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">{{ $attempt->score ?? '-' }}</td>
+                            <td class="px-6 py-4"><a href="{{ route('exam.review', $attempt->id) }}" class="text-blue-400">Review</a></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            {{ $recentAttempts->links('vendor.pagination.flowbite') }}
+        </div> 
+        <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-white">
+    @endif
+
     <!-- Exam Attempts Table -->
     <div class="relative overflow-x-auto shadow-xl">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <!-- Table Header -->
             <thead class="text-xs text-white uppercase bg-cyan-900 dark:bg-cyan-900 dark:text-white">
                 <tr>
                     <th colspan="5" class="px-6 py-3 text-lg">Exam Attempts</th>
                 </tr>
             </thead>
-            <!-- Column Headers -->
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
                 <tr>
                     <th scope="col" class="px-6 py-3">Exam</th>

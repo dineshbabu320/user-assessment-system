@@ -17,59 +17,61 @@
     </div>
         
     <!-- Tokens Section -->
-    <div id="tokens-section" class="mb-6">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tokens</h3>
-        @if ($tokens->count() > 0)
-            <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
-                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Token ID</th>
-                            <th scope="col" class="px-6 py-3">Issued Date</th>
-                            <th scope="col" class="px-6 py-3">Expiry Date</th>
-                            <th scope="col" class="px-6 py-3">Status</th>
-                            <th scope="col" class="px-6 py-3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($tokens as $token)
-                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-6 py-4">{{ $token->id }}</td>
-                                <td class="px-6 py-4">{{ $token->issued_at->format('Y-m-d') }}</td>
-                                <td class="px-6 py-4">{{ $token->expires_at->format('Y-m-d') }}</td>
-                                <td class="px-6 py-4">
-                                    @if ($token->status == 'active')
-                                        <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Active</span>
-                                    @elseif ($token->status == 'used')
-                                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Used</span>
-                                    @elseif ($token->status == 'revoked')
-                                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Revoked</span>
-                                    @else
-                                        <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Expired</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if ($token->status == 'active')
-                                        <form action="{{ route('tokens.revoke', $token->token_instance_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to revoke this token?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Revoke</button>
-                                        </form>
-                                    @endif
-                                </td>
+    @if (!auth()->user()->isMentor())
+        <div id="tokens-section" class="mb-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tokens</h3>
+            @if ($tokens->count() > 0)
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Token ID</th>
+                                <th scope="col" class="px-6 py-3">Issued Date</th>
+                                <th scope="col" class="px-6 py-3">Expiry Date</th>
+                                <th scope="col" class="px-6 py-3">Status</th>
+                                <th scope="col" class="px-6 py-3">Action</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination Links -->
-            <div class="mt-4">
-                {{ $tokens->appends(['attempts_page' => request('attempts_page')])->links('vendor.pagination.flowbite') }}
-            </div>
-        @else
-            <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
-        @endif
-    </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($tokens as $token)
+                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <td class="px-6 py-4">{{ $token->id }}</td>
+                                    <td class="px-6 py-4">{{ $token->issued_at->format('Y-m-d') }}</td>
+                                    <td class="px-6 py-4">{{ $token->expires_at->format('Y-m-d') }}</td>
+                                    <td class="px-6 py-4">
+                                        @if ($token->status == 'active')
+                                            <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Active</span>
+                                        @elseif ($token->status == 'used')
+                                            <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Used</span>
+                                        @elseif ($token->status == 'revoked')
+                                            <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Revoked</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded dark:bg-red-900 dark:text-red-300">Expired</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($token->status == 'active')
+                                            <form action="{{ route('tokens.revoke', $token->token_instance_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to revoke this token?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="cursor-pointer px-4 py-2 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Revoke</button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination Links -->
+                <div class="mt-4">
+                    {{ $tokens->appends(['attempts_page' => request('attempts_page')])->links('vendor.pagination.flowbite') }}
+                </div>
+            @else
+                <p class="text-gray-500 dark:text-gray-400 mt-4">No tokens found for this student.</p>
+            @endif
+        </div>
+    @endif
 
     <!-- Exam Attempts Section -->
     <div id="attempts-section" class="mb-6">
@@ -83,7 +85,7 @@
                             <th scope="col" class="px-6 py-3">Score</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3">Attempt Date</th>
-                            @if (auth()->user()->isSubdivisionStaff() || auth()->user()->isAdmin())
+                            @if (auth()->user()->isSubdivisionStaff() || auth()->user()->isAdmin() || auth()->user()->isMentor())
                                 <th scope="col" class="px-6 py-3">Review</th>
                             @endif
                             @if (auth()->user()->isAdmin())
@@ -131,11 +133,6 @@
         @else
             <p class="text-gray-500 dark:text-gray-400 mt-4">No exam attempts found for this student.</p>
         @endif
-    </div>
-
-    <!-- Back Button -->
-    <div class="mt-6">
-        <a href="{{ route('students.search') }}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Back to Search</a>
     </div>
 </div>
 

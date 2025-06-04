@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->hasRole('Subdivision Staff');
     }
 
+    public function isMentor()
+    {
+        return $this->hasRole("Mentor");
+    }
+
     public function hasRole($role)
     {
         return $this->roles->contains('name', $role);

@@ -45,6 +45,28 @@ class DashboardController extends Controller
                             ->orderBy('attempted_at', 'desc')
                             ->paginate(5);
 
-        return view('dashboard', compact('user_rating', 'active_token', 'exam_attempts', 'subdivisionName', 'subdivisionID'));
+        // Recent attempts logic (last 7 days, paginated)
+        $recentAttempts = collect();
+
+        if ($user->isAdmin()) {
+            $recentAttempts = Attempt::with(['user', 'exam'])
+                ->where('attempted_at', '>=', now()->subDays(7))
+                ->where('user_cid', '!=', $user->cid)
+                ->orderBy('attempted_at', 'desc')
+                ->paginate(5, ['*'], 'recent_attempts_page');
+        } elseif ($user->isSubdivisionStaff() || $user->isMentor()) {
+            $recentAttempts = Attempt::with(['user', 'exam'])
+                ->whereHas('user', function($q) use ($user) {
+                    $q->where('subdivision_id', $user->subdivision_id);
+                })
+                ->where('attempted_at', '>=', now()->subDays(7))
+                ->where('user_cid', '!=', $user->cid)
+                ->orderBy('attempted_at', 'desc')
+                ->paginate(5, ['*'], 'recent_attempts_page');
+        }
+
+        return view('dashboard', compact(
+            'user_rating', 'active_token', 'exam_attempts', 'subdivisionName', 'subdivisionID', 'recentAttempts'
+        ));
     }
 }

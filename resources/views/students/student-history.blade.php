@@ -82,7 +82,7 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">
                         <tr>
                             <th scope="col" class="px-6 py-3">Exam Name</th>
-                            <th scope="col" class="px-6 py-3">Score</th>
+                            <th scope="col" class="px-6 py-3">Percentage</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3">Attempt Date</th>
                             @if (auth()->user()->isSubdivisionStaff() || auth()->user()->isAdmin() || auth()->user()->isMentor())
@@ -97,7 +97,7 @@
                         @foreach ($attempts as $attempt)
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->exam->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->score ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $attempt->percentage.'%' ?? 'N/A' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if ($attempt->status === 'passed')
                                         <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-300">Passed</span>

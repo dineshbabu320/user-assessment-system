@@ -134,7 +134,7 @@
                     const questionId = button.dataset.id;
                     const questionText = button.dataset.question;
 
-                    if (confirm(`Are you sure you want to delete the question: "${questionText}"?`)) {
+                    if (confirm(`Are you sure you want to delete the question?`)) {
                         try {
                             const response = await fetch(`/admin/questions/${questionId}`, {
                                 method: 'DELETE',

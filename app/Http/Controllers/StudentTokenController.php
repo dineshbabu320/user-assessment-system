@@ -61,7 +61,7 @@ class StudentTokenController extends Controller
         $cooldown = Attempt::where('user_cid', $request->user_cid)
             ->where('status', 'failed') 
             ->whereNotNull('cooldown_until') 
-            ->orderBy('cooldown_until', 'desc') // Get the latest cooldown
+            ->orderBy('cooldown_until', 'desc')
             ->first();
 
         // if ($cooldown && now()->lessThan($cooldown->cooldown_until)) {
@@ -70,6 +70,16 @@ class StudentTokenController extends Controller
 
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1);
+
+        // Check for active tokens
+        $activeToken = Token::where('id', '=',$tokenId)
+                    ->where('status', '=','active')
+                    ->where('user_cid', $request->user_cid)
+                    ->first();
+
+        if($activeToken) {
+            return redirect()->back()->with('error','The user already has an active token for the exam');
+        }
 
         // Ensure the exam_id exists in the exams table
         $exam = Exam::where('name', $examId)->first();

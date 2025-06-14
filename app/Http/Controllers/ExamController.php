@@ -271,9 +271,13 @@ class ExamController extends Controller
 
             $customMessage = "Dear {$user->name}, your exam submission for exam {$exam->name} has been received";
 
+            $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($user) {
+                $q->where('subdivision_id', $user->subdivision_id);
+            })->pluck('email')->toArray();
+
             Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc($adminEmails)->queue(new ExamPassedNotification($user, $exam, $percentage, $attempt_number));
         }
 
         else if ($status === 'failed') {
@@ -295,9 +299,13 @@ class ExamController extends Controller
 
             $customMessage = "Dear {$user->name}, your exam submission for exam {$exam->name} has been received";
 
+            $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($user) {
+                $q->where('subdivision_id', $user->subdivision_id);
+            })->pluck('email')->toArray();
+
             Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
-            Mail::to($subdivisionDirectors)->bcc(self::ADMIN_EMAIL)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
+            Mail::to($subdivisionDirectors)->bcc($adminEmails)->queue(new ExamFailedNotification($user, $exam, $percentage, $attempt_number));
         }
 
         else {

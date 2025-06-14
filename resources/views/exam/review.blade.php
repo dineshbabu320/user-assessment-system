@@ -34,8 +34,8 @@
             @if ($attempt->status !== 'waiting_for_manual_evaluation')
                 <div>
                     <h2 class="text-gray-900 dark:text-white">
-                        Total Score: {{ $totalScore }}/{{ $maxScore }} 
-                        ({{ $maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0 }}%)
+                        Percentage:
+                        {{ $attempt->percentage }}%
                     </h2>
                 </div>
             @endif

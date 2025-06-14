@@ -117,7 +117,7 @@
                         <th class="px-6 py-3">Exam</th>
                         <th class="px-6 py-3">Date</th>
                         <th class="px-6 py-3">Status</th>
-                        <th class="px-6 py-3">Score</th>
+                        <th class="px-6 py-3">Percentage</th>
                         <th class="px-6 py-3">Review</th>
                     </tr>
                 </thead>
@@ -138,7 +138,7 @@
                                     <span class="text-yellow-500 font-bold">In Progress</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">{{ $attempt->score ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $attempt->percentage.'%' ?? '-' }}</td>
                             <td class="px-6 py-4"><a href="{{ route('exam.review', $attempt->id) }}" class="text-blue-400">Review</a></td>
                         </tr>
                     @endforeach
@@ -165,7 +165,7 @@
                     <th scope="col" class="px-6 py-3">Exam</th>
                     <th scope="col" class="px-6 py-3">Date</th>
                     <th scope="col" class="px-6 py-3">Status</th>
-                    <th scope="col" class="px-6 py-3">Score</th>
+                    <th scope="col" class="px-6 py-3">Percentage</th>
                     <th scope="col" class="px-6 py-3">Actions</th>
                 </tr>
             </thead>
@@ -185,7 +185,7 @@
                                 <span class="text-yellow-500 font-bold">In Progress</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4">{{ $attempt->score && $attempt->status!=='waiting_for_manual_evaluation' ? $attempt->score : '-' }}</td>
+                        <td class="px-6 py-4">{{ $attempt->score && $attempt->status!=='waiting_for_manual_evaluation' ? $attempt->percentage.'%' : '-' }}</td>
                         <td class="px-6 py-4">
                             <a href="{{ route('exam.review', $attempt->id) }}" class="text-blue-400">Review</a>
                         </td>

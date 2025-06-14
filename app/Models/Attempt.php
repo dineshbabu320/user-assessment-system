@@ -45,4 +45,12 @@ class Attempt extends Model
     {
         return $this->hasMany(Response::class, 'attempt_id');
     }
+
+    public function getPercentageAttribute()
+    {
+        $questions = $this->exam->questions->whereIn('id', $this->question_ids ?? []);
+        $maxScore = $questions->sum('points');
+        if ($maxScore == 0) return 0;
+        return round(($this->score / $maxScore) * 100, 1);
+    }
 }

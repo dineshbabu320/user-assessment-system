@@ -77,6 +77,10 @@ class User extends Authenticatable
     {
         return $this->hasRole('Examiner');
     }
+    public function subdivisionNotifications()
+    {
+        return $this->hasMany(AdminSubdivisionNotification::class, 'admin_cid', 'cid');
+    }
 
     public function getTokenAttribute()
     {

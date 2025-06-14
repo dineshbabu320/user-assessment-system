@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\StudentTokenController;
 use App\Http\Controllers\DashboardController;
@@ -77,5 +78,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::put('/admin/update-settings', [ExamController::class, 'updateExamSettings'])->name('admin.updateSettings');
         Route::post('/admin/questions/{id}/remove-file', [QuestionController::class, 'removeFile'])->name('admin.questions.remove-file');
         Route::post('/admin/roles/adjust', [RoleController::class, 'adjustRoles'])->name('admin.roles.adjust');
+        Route::get('/admin/notifications', [AdminNotificationController::class, 'edit'])->name('admin.notifications.edit');
+        Route::post('/admin/notifications', [AdminNotificationController::class, 'update'])->name('admin.notifications.update');
     });
 });

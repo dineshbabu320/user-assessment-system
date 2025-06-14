@@ -449,12 +449,11 @@
             <textarea name="wrong_comment" id="wrong_comment" rows="2" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{{ old('wrong_comment', $question->wrong_comment ?? '') }}</textarea>
         </div>
 
-        @if(old('question_type', $question->question_type ?? '') === 'text')
-            <div class="mb-4">
-                <label for="answer_key" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Answer Key</label>
-                <textarea name="answer_key" id="answer_key" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{{ old('answer_key', $question->answer_key ?? '') }}</textarea>
-            </div>
-        @endif
+        <!-- Answer Key -->
+        <div id="answer-key-container" class="mb-4 {{ old('question_type', $question->question_type ?? '') === 'text' ? '' : 'hidden' }}">
+            <label for="answer_key" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Answer Key</label>
+            <textarea name="answer_key" id="answer_key" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">{{ old('answer_key', $question->answer_key ?? '') }}</textarea>
+        </div>
 
         <!-- Points -->
         <div class="mb-4">
@@ -537,6 +536,7 @@
         const questionTypeSelect = document.getElementById('question_type');
         const optionsContainer = document.getElementById('options-container');
         const correctAnswersContainer = document.getElementById('correct-answers-container');
+        const answerKeyContainer = document.getElementById('answer-key-container');
 
         // Toggle options and correct answers fields based on question type
         questionTypeSelect.addEventListener('change', (e) => {
@@ -544,9 +544,15 @@
             if (type === 'mcq' || type === 'single') {
                 optionsContainer.classList.remove('hidden');
                 correctAnswersContainer.classList.remove('hidden');
+                answerKeyContainer.classList.add('hidden');
+            } else if (type === 'text') {
+                optionsContainer.classList.add('hidden');
+                correctAnswersContainer.classList.add('hidden');
+                answerKeyContainer.classList.remove('hidden');
             } else {
                 optionsContainer.classList.add('hidden');
                 correctAnswersContainer.classList.add('hidden');
+                answerKeyContainer.classList.add('hidden');
             }
         });
 

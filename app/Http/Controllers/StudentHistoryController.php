@@ -12,7 +12,7 @@ class StudentHistoryController extends Controller
     {
         $student = User::where('cid', $cid)
             ->where(function ($query) {
-                if (!auth()->user()->isAdmin() || !auth()->user()->isExaminer()) {
+                if (!auth()->user()->isAdmin() && !auth()->user()->isExaminer()) {
                     $query->where('subdivision_id', auth()->user()->subdivision_id);
                 }
             })

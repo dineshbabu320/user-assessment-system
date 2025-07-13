@@ -8,13 +8,35 @@
                <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
             </svg>
          </button>
-        <a href="https://exam.vat-sea.com/dashboard" class="flex ms-2 md:me-24">
+        <a href="https://exam.vat-sea.com/dashboard" class="hidden sm:flex ms-2 md:me-24">
           <img src="{{ asset('images/SEA_TEST_DARK.png') }}" class="h-8 me-3 dark:hidden" alt="Logo" />
           <img src="{{ asset('images/SEA_TEST_LIGHT.png') }}" class="h-8 me-3 hidden dark:block" alt="Logo" />
           <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">SEA-TEST</span>
         </a>
+        
+        @if(!auth()->user()->isStudent())
+        <div class="flex sm:hidden flex-1 mx-2">
+          <div class="relative w-full">
+            <input
+              type="text"
+              id="user-search-mobile"
+              autocomplete="off"
+              class="w-full p-2 pl-9 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              placeholder="Search users..."
+            >
+            <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="none" viewBox="0 0 20 20">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+              </svg>
+            </div>
+            <div id="user-search-results-mobile"
+              class="absolute left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow z-50 hidden"></div>
+          </div>
+        </div>
+        @endif
       </div>
-      <div class="flex-1 flex justify-end mr-3">
+      <div class="hidden sm:flex flex-1 justify-end mr-3">
         @if(!auth()->user()->isStudent())
         <div class="relative w-60">
           <input
@@ -35,57 +57,61 @@
         </div>
         @endif
       </div>
-      @can('subdivisionStaff')
-         <button id="notification-settings-btn" data-modal-target="notification-settings-modal" data-modal-toggle="notification-settings-modal" data-tooltip-target="tooltip-bottom" data-tooltip-placement="bottom" type="button" class="cursor-pointer mr-2 text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
-            <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-               <path d="M11.209 3.816a1 1 0 0 0-1.966.368l.325 1.74a5.338 5.338 0 0 0-2.8 5.762l.276 1.473.055.296c.258 1.374-.228 2.262-.63 2.998-.285.52-.527.964-.437 1.449.11.586.22 1.173.75 1.074l12.7-2.377c.528-.1.418-.685.308-1.27-.103-.564-.636-1.123-1.195-1.711-.606-.636-1.243-1.306-1.404-2.051-.233-1.085-.275-1.387-.303-1.587-.009-.063-.016-.117-.028-.182a5.338 5.338 0 0 0-5.353-4.39l-.298-1.592Z"/>
-               <path fill-rule="evenodd" d="M6.539 4.278a1 1 0 0 1 .07 1.412c-1.115 1.23-1.705 2.605-1.83 4.26a1 1 0 0 1-1.995-.15c.16-2.099.929-3.893 2.342-5.453a1 1 0 0 1 1.413-.069Z" clip-rule="evenodd"/>
-               <path d="M8.95 19.7c.7.8 1.7 1.3 2.8 1.3 1.6 0 2.9-1.1 3.3-2.5l-6.1 1.2Z"/>
-            </svg>
-         </button>
-         <div id="tooltip-bottom" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-xs opacity-0 tooltip">
-            Update Mail Settings
-            <div class="tooltip-arrow" data-popper-arrow></div>
-         </div>
-      @endcan
-      <button id="theme-toggle" type="button" class="cursor-pointer ml-auto text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
-        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-      </button>
-      <div class="flex items-center">
-          <div class="flex items-center ms-3">
-            <div>
-              <button type="button" class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer" aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-                    <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                </div>
-              </button>
-            </div>
-            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
-              <div class="px-4 py-3" role="none">
-                <p class="text-sm text-gray-900 dark:text-white" role="none">
-                  {{ auth()->user()->name }}
-                </p>
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-                  {{ auth()->user()->email }}
-                </p>
+      <div class="flex items-center space-x-2">
+        @can('subdivisionStaff')
+           <button id="notification-settings-btn" data-modal-target="notification-settings-modal" data-modal-toggle="notification-settings-modal" data-tooltip-target="tooltip-bottom" data-tooltip-placement="bottom" type="button" class="cursor-pointer text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+              <svg class="w-[25px] h-[25px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                 <path d="M11.209 3.816a1 1 0 0 0-1.966.368l.325 1.74a5.338 5.338 0 0 0-2.8 5.762l.276 1.473.055.296c.258 1.374-.228 2.262-.63 2.998-.285.52-.527.964-.437 1.449.11.586.22 1.173.75 1.074l12.7-2.377c.528-.1.418-.685.308-1.27-.103-.564-.636-1.123-1.195-1.711-.606-.636-1.243-1.306-1.404-2.051-.233-1.085-.275-1.387-.303-1.587-.009-.063-.016-.117-.028-.182a5.338 5.338 0 0 0-5.353-4.39l-.298-1.592Z"/>
+                 <path fill-rule="evenodd" d="M6.539 4.278a1 1 0 0 1 .07 1.412c-1.115 1.23-1.705 2.605-1.83 4.26a1 1 0 0 1-1.995-.15c.16-2.099.929-3.893 2.342-5.453a1 1 0 0 1 1.413-.069Z" clip-rule="evenodd"/>
+                 <path d="M8.95 19.7c.7.8 1.7 1.3 2.8 1.3 1.6 0 2.9-1.1 3.3-2.5l-6.1 1.2Z"/>
+              </svg>
+           </button>
+           <div id="tooltip-bottom" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-xs opacity-0 tooltip">
+              Update Mail Settings
+              <div class="tooltip-arrow" data-popper-arrow></div>
+           </div>
+        @endcan
+        
+        <button id="theme-toggle" type="button" class="cursor-pointer text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
+        
+        <div class="flex items-center">
+            <div class="flex items-center">
+              <div>
+                <button type="button" class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                  <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                      <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                  </div>
+                </button>
               </div>
-              <ul class="py-1" role="none">
-               <li>
-                  <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Dashboard</a>
-               </li>
-               @if(auth()->user()->isAdmin())
-                  <li>
-                     <a href="{{ route('admin.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Admin Settings</a>
-                  </li>
-               @endif
-               <li>
-                  <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
-               </li>
-              </ul>
+              <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
+                <div class="px-4 py-3" role="none">
+                  <p class="text-sm text-gray-900 dark:text-white" role="none">
+                    {{ auth()->user()->name }}
+                  </p>
+                  <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                    {{ auth()->user()->email }}
+                  </p>
+                </div>
+                <ul class="py-1" role="none">
+                 <li>
+                    <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Dashboard</a>
+                 </li>
+                 @if(auth()->user()->isAdmin())
+                    <li>
+                       <a href="{{ route('admin.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Admin Settings</a>
+                    </li>
+                 @endif
+                 <li>
+                    <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
+                 </li>
+                </ul>
+              </div>
             </div>
-          </div>
         </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -248,47 +274,67 @@
 
 <script>
 let searchTimeout = null;
+
+// Desktop search functionality
 const searchInput = document.getElementById('user-search');
 const resultsBox = document.getElementById('user-search-results');
 
-searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    const query = this.value.trim();
-    
-    // Clear results if query is empty
-    if (query.length === 0) {
-        resultsBox.innerHTML = '';
-        resultsBox.classList.add('hidden');
-        return;
-    }
+// Mobile search functionality
+const searchInputMobile = document.getElementById('user-search-mobile');
+const resultsBoxMobile = document.getElementById('user-search-results-mobile');
 
-    searchTimeout = setTimeout(() => {
-        fetch(`/user-search?q=${encodeURIComponent(query)}`)
-            .then(res => res.json())
-            .then(users => {
-                if (users.length === 0) {
-                    resultsBox.innerHTML = '<div class="p-2 text-gray-500 text-black dark:text-white">No users found.</div>';
-                } else {
-                    resultsBox.innerHTML = users.map(u =>
-                        `<div class="block p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b last:border-b-0 text-black dark:text-white" onclick="window.location.href='/student/${u.cid}'">
-                            ${u.name} <span>(${u.cid})</span>
-                        </div>`
-                    ).join('');
-                }
-                resultsBox.classList.remove('hidden');
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-                resultsBox.innerHTML = '<div class="p-2 text-red-500">Search failed. Please try again.</div>';
-                resultsBox.classList.remove('hidden');
-            });
-    }, 300);
-});
+function handleSearch(input, results) {
+    if (!input || !results) return;
+    
+    input.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        // Clear results if query is empty
+        if (query.length === 0) {
+            results.innerHTML = '';
+            results.classList.add('hidden');
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/user-search?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(users => {
+                    if (users.length === 0) {
+                        results.innerHTML = '<div class="p-2 text-gray-500 text-black dark:text-white">No users found.</div>';
+                    } else {
+                        results.innerHTML = users.map(u =>
+                            `<div class="block p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b last:border-b-0 text-black dark:text-white" onclick="window.location.href='/student/${u.cid}'">
+                                ${u.name} <span>(${u.cid})</span>
+                            </div>`
+                        ).join('');
+                    }
+                    results.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    results.innerHTML = '<div class="p-2 text-red-500">Search failed. Please try again.</div>';
+                    results.classList.remove('hidden');
+                });
+        }, 300);
+    });
+}
+
+// Initialize both search boxes
+handleSearch(searchInput, resultsBox);
+handleSearch(searchInputMobile, resultsBoxMobile);
 
 // Hide results when clicking outside
 document.addEventListener('click', function(e) {
-    if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+    // Desktop search
+    if (searchInput && resultsBox && !searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
         resultsBox.classList.add('hidden');
+    }
+    
+    // Mobile search
+    if (searchInputMobile && resultsBoxMobile && !searchInputMobile.contains(e.target) && !resultsBoxMobile.contains(e.target)) {
+        resultsBoxMobile.classList.add('hidden');
     }
 });
 </script>

@@ -12,7 +12,7 @@ class StudentHistoryController extends Controller
     {
         $student = User::where('cid', $cid)
             ->where(function ($query) {
-                if (!auth()->user()->isAdmin()) {
+                if (!auth()->user()->isAdmin() || !auth()->user()->isExaminer()) {
                     $query->where('subdivision_id', auth()->user()->subdivision_id);
                 }
             })
@@ -30,5 +30,25 @@ class StudentHistoryController extends Controller
             ->paginate(5, ['*'], 'attempts_page');
 
         return view('students.student-history', compact('student', 'tokens', 'attempts'));
+    }
+
+    public function search(Request $request)
+    {
+        $term = $request->input('q');
+        $excludeId = auth()->id();
+
+        $users = User::where('cid', '!=', $excludeId)
+            ->when(!auth()->user()->canSearchAllStudents(), function ($query) {
+                // not admin, filter by own subdivision
+                $query->where('subdivision_id', auth()->user()->subdivision_id);
+            })
+            ->where(function($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('cid', 'like', "%{$term}%");
+            })
+            ->limit(10)
+            ->get(['name', 'cid']);
+
+        return response()->json($users);
     }
 }

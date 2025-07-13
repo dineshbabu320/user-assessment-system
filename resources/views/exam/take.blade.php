@@ -11,7 +11,7 @@
                 <div class="flex items-start space-x-4 mb-5">
                     <span class="text-lg font-medium text-gray-900 dark:text-white">{{ $loop->iteration }}.</span>
                     <div class="flex-1">
-                        <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $question->parsed_text !!}</span>
+                        <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $question->question_text !!}</span>
                     </div>
                 </div>
 

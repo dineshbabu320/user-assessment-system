@@ -10,7 +10,7 @@
                 <div class="flex items-start space-x-4 mb-2">
                     <span class="text-lg font-medium text-gray-900 dark:text-white">Question:</span>
                     <div class="flex-1">
-                        <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $response->question->parsed_text !!}</span>
+                        <span class="text-lg font-medium text-gray-900 dark:text-white">{!! $response->question->question_text !!}</span>
                     </div>
                 </div>
                 <p class="text-gray-700 dark:text-gray-300">Student Response:</p>

@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasRole('Admin');
     }
 
+    public function isStudent(): bool
+    {
+        return $this->hasRole('Student');
+    }
+
     public function isSubdivisionStaff(): bool
     {
         return $this->hasRole('Subdivision Staff');
@@ -106,5 +111,15 @@ class User extends Authenticatable
 
             return $token;
         }
+    }
+
+    public function canSearchAllStudents()
+    {
+        return $this->isAdmin();
+    }
+
+    public function canViewStudent($student)
+    {
+        return $this->isAdmin() || $this->subdivision_id === $student->subdivision_id;
     }
 }

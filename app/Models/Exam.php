@@ -10,7 +10,7 @@ class Exam extends Model
     use HasFactory;
 
     public $timestamps=false;
-    protected $fillable = ['name','question_limit','category_ratios'];
+    protected $fillable = ['name','question_limit','subdivision_question_limit','category_ratios'];
 
     protected $casts = [
         'category_ratios' => 'array',

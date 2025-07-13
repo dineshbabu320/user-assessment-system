@@ -35,7 +35,11 @@ class QuestionController extends Controller
 
         $exam = Exam::findOrFail($request->exam_id);
 
-        $questions = $exam->questions()->with('answers')->paginate(10); 
+        $query = $exam->questions()->with('answers')->whereNull('subdivision_id');
+        if ($request->filled('category')) {
+            $query->where('category', $request->category); // filter by category if selected
+        }
+        $questions = $query->paginate(10); 
 
         $questions->getCollection()->transform(function ($question) {
             return [
@@ -282,5 +286,20 @@ class QuestionController extends Controller
             'message' => 'File removed successfully!',
             'redirect_url' => route('admin.questions.edit', $id), // Redirect to the edit page
         ]);
+    }
+
+    public function getExamCategories(Request $request)
+    {
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+        ]);
+        $categories = Question::where('exam_id', $request->exam_id)
+            ->whereNotNull('category')
+            ->where('category', '!=', 'local')
+            ->distinct()
+            ->pluck('category')
+            ->sort()
+            ->values();
+        return response()->json(['categories' => $categories]);
     }
 }

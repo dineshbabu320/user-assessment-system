@@ -7,7 +7,6 @@ use App\Models\Attempt;
 use App\Models\Exam;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Parsedown;
 use App\Mail\ExamPassedNotification;
 use App\Mail\ExamFailedNotification;
 use App\Mail\ExamCompletedNotification;
@@ -19,7 +18,6 @@ class ExamController extends Controller
 {
     // Constants
     private const PASS_RATE = 0.8; // 80%
-    private const ADMIN_EMAIL = 'js.hoo@vat-sea.com';
     private const TOKEN_PREFIX = 'READY-';
 
     /**
@@ -186,11 +184,6 @@ class ExamController extends Controller
 
         $selectedQuestions = $exam->questions->whereIn('id', $attempt->question_ids);
 
-        $parsedown = new Parsedown();
-        foreach ($selectedQuestions as $question) {
-            $question->parsed_text = $parsedown->text($question->question_text);
-        }
-
         return view('exam.take', [
             'exam' => $exam,
             'questions' => $selectedQuestions,
@@ -260,7 +253,11 @@ class ExamController extends Controller
                 ->whereHas('roles', function ($q) {
                     $q->where('id', 2);
                 })
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -273,7 +270,10 @@ class ExamController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($user) {
                 $q->where('subdivision_id', $user->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()->toArray();
 
             Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
@@ -288,7 +288,11 @@ class ExamController extends Controller
                 ->whereHas('roles', function ($q) {
                     $q->where('id', 2);
                 })
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -301,7 +305,12 @@ class ExamController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($user) {
                 $q->where('subdivision_id', $user->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')
+            ->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()
+            ->toArray();
 
             Mail::to($user->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
@@ -353,11 +362,6 @@ class ExamController extends Controller
         $responses = $attempt->responses->keyBy('question_id');
         $attendedQuestionIds = $responses->keys();
         $questions = $exam->questions->whereIn('id', $attendedQuestionIds);
-
-        $parsedown = new Parsedown();
-        foreach ($questions as $question) {
-            $question->parsed_text = $parsedown->text($question->question_text);
-        }
 
         $maxScore = $exam->questions->whereIn('id', $attendedQuestionIds)->sum('points');
         $totalScore = $attempt->score;
@@ -429,15 +433,46 @@ class ExamController extends Controller
             ->where('status', 'in_progress')
             ->first();
 
-        if (!$attempt) {
-            // Randomize questions ONCE
-            $categoryRatios = $exam->category_ratios ?? [];
-            $selectedQuestions = collect();
-            foreach ($categoryRatios as $category => $count) {
-                $categoryQuestions = $exam->questions->where('category', $category);
-                $selectedQuestions = $selectedQuestions->merge($categoryQuestions->shuffle()->take($count));
+        $user = auth()->user();
+        $subdivisionId = $user->subdivision_id ?? null;
+
+        $ratios = $exam->category_ratios ?? [];
+        $totalQuestions = $exam->question_limit;
+        $selectedQuestions = collect();
+
+        foreach ($ratios as $category => $count) {
+            if ($category === 'local' && $subdivisionId) {
+                $qs = $exam->questions()
+                    ->where('category', 'local')
+                    ->where('subdivision_id', $subdivisionId)
+                    ->inRandomOrder()
+                    ->take($count)
+                    ->get();
+            } else {
+                $qs = $exam->questions()
+                    ->where('category', $category)
+                    ->whereNull('subdivision_id')
+                    ->inRandomOrder()
+                    ->take($count)
+                    ->get();
             }
-            $selectedQuestions = $selectedQuestions->shuffle();
+            $selectedQuestions = $selectedQuestions->merge($qs);
+        }
+
+        $shortfall = $totalQuestions - $selectedQuestions->count();
+        if ($shortfall > 0) {
+            $alreadySelectedIds = $selectedQuestions->pluck('id')->toArray();
+            $randomQs = $exam->questions()
+                ->whereNotIn('id', $alreadySelectedIds)
+                ->inRandomOrder()
+                ->take($shortfall)
+                ->get();
+            $selectedQuestions = $selectedQuestions->merge($randomQs);
+        }
+
+        $selectedQuestions = $selectedQuestions->shuffle()->take($totalQuestions);
+
+        if (!$attempt) {
 
             // Attempt number: only count completed attempts
             $attemptNumber = Attempt::where('user_cid', auth()->user()->cid)
@@ -454,9 +489,12 @@ class ExamController extends Controller
                 'cooldown_until' => null,
                 'question_ids' => $selectedQuestions->pluck('id')->toArray(),
             ]);
+        } else {
+            $attempt->update([
+                'attempted_at' => now()
+            ]);
         }
 
-        // Always redirect to takeExam with the attempt id
         return redirect()->route('exam.take', [$examName, 'attempt' => $attempt->id]);
     }
 }

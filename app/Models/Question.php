@@ -14,6 +14,7 @@ class Question extends Model
         'exam_id',
         'question_text',
         'question_type',
+        'subdivision_id',
         'options',
         'correct_answer',
         'points',

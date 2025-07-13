@@ -2,24 +2,34 @@
 
 @section('content')
 <div id="main-content" class="ml-64 pt-20 pb-6 pl-4 pr-4">
-    <h1 class="text-2xl font-bold mb-4 text-black dark:text-white">Manage Questions</h1>
-
-    <!-- Exam Selection -->
-    <div class="mb-6">
-        <label for="exam-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Exam</label>
-        <select id="exam-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
-            @foreach ($exams as $exam)
-                <option value="{{ $exam->id }}" {{ request('exam_id', $exams->first()->id) == $exam->id ? 'selected' : '' }}>
-                    {{ $exam->name }}
-                </option>
-            @endforeach
-        </select>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold text-black dark:text-white">Manage Questions</h1>
+        <a id="add-question-btn" href="{{ route('admin.questions.create', ['exam_id' => $exams->first()->id ?? '']) }}" class="flex items-center gap-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Question
+        </a>
     </div>
-
-    <!-- Add Question Button -->
-    <a id="add-question-btn" href="{{ route('admin.questions.create', ['exam_id' => $exams->first()->id ?? '']) }}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        Add Question
-    </a>
+    
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <div class="flex-1">
+            <label for="exam-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Exam</label>
+            <select id="exam-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                @foreach ($exams as $exam)
+                    <option value="{{ $exam->id }}" {{ request('exam_id', $exams->first()->id) == $exam->id ? 'selected' : '' }}>
+                        {{ $exam->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex-1">
+            <label for="category-select" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Category</label>
+            <select id="category-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+    </div>
 
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="flex fixed inset-0 justify-center items-center z-50">
@@ -56,6 +66,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const examSelect = document.getElementById('exam-select');
+        const categorySelect = document.getElementById('category-select');
         const addQuestionBtn = document.getElementById('add-question-btn');
         const questionsTableBody = document.getElementById('questions-table-body');
         const questionsTableContainer = document.getElementById('questions-table-container');
@@ -64,20 +75,19 @@
         const loadQuestions = async (examId, page = 1) => {
             try {
                 loadingSpinner.classList.remove('hidden');
-
-                // Update the "Add Question" button link
                 addQuestionBtn.href = `/admin/questions/create/${examId}`;
-
-                // Fetch questions for the selected exam with pagination
                 const response = await fetch('{{ route('api.exams.questions') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ exam_id: examId, page: page }),
+                    body: JSON.stringify({ 
+                        exam_id: examId, 
+                        category: categorySelect.value, 
+                        page: page 
+                    }),
                 });
-
                 if (!response.ok) throw new Error('Failed to fetch questions');
                 const data = await response.json();
                 renderQuestionsTable(data.questions, data.pagination);
@@ -101,11 +111,17 @@
                     <td class="px-6 py-4">${question.points}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center space-x-4 actions">
-                            <a href="/admin/questions/${question.id}/edit" class="text-blue-600 hover:underline">Edit</a>
+                            <a href="/admin/questions/${question.id}/edit">
+                                <svg class="w-[23px] h-[23px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M15.514 3.293a1 1 0 0 0-1.415 0L12.151 5.24a.93.93 0 0 1 .056.052l6.5 6.5a.97.97 0 0 1 .052.056L20.707 9.9a1 1 0 0 0 0-1.415l-5.193-5.193ZM7.004 8.27l3.892-1.46 6.293 6.293-1.46 3.893a1 1 0 0 1-.603.591l-9.494 3.355a1 1 0 0 1-.98-.18l6.452-6.453a1 1 0 0 0-1.414-1.414l-6.453 6.452a1 1 0 0 1-.18-.98l3.355-9.494a1 1 0 0 1 .591-.603Z" clip-rule="evenodd"/>
+                                </svg>
+                            </a>
                             <button 
                                 class="text-red-600 hover:underline cursor-pointer delete-question-btn" 
                                 data-id="${question.id}" >
-                                Delete
+                                <svg class="w-[23px] h-[23px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                </svg>
                             </button>
                         </div>
                     </td>
@@ -155,25 +171,53 @@
             });
         };
 
-        // Automatically load questions for the first exam or the selected exam
-        const selectedExamId = examSelect.value;
-        if (selectedExamId) {
-            loadQuestions(selectedExamId);
-        }
+        const updateCategoryDropdown = async (examId, selectedCategory = '') => {
+            const response = await fetch('{{ route('admin.exams.categories') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ exam_id: examId }),
+            });
+            const data = await response.json();
+            categorySelect.innerHTML = '<option value="">All Categories</option>' +
+                data.categories.map(cat =>
+                    `<option value="${cat}" ${cat === selectedCategory ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+        };
 
-        // Load questions when the exam is changed
+        // On page load, get categories for first exam, then load questions hor
+        const selectedExamId = examSelect.value;
+        updateCategoryDropdown(selectedExamId).then(() => {
+            loadQuestions(selectedExamId);
+        });
+
+        // When exam change, update category dropdown then reload questions, steady lah
         examSelect.addEventListener('change', () => {
             const examId = examSelect.value;
-            history.pushState({ examId }, '', `?exam_id=${examId}`);
+            updateCategoryDropdown(examId).then(() => {
+                history.pushState({ examId, category: '' }, '', `?exam_id=${examId}`);
+                loadQuestions(examId);
+            });
+        });
+
+        // When category change, just reload questions, simple one
+        categorySelect.addEventListener('change', () => {
+            const examId = examSelect.value;
+            history.pushState({ examId, category: categorySelect.value }, '', `?exam_id=${examId}&category=${encodeURIComponent(categorySelect.value)}`);
             loadQuestions(examId);
         });
 
-        // Handle back/forward navigation
+        // Handle back/forward, update selects and reload, don't
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             if (state && state.examId) {
                 examSelect.value = state.examId;
-                loadQuestions(state.examId);
+                updateCategoryDropdown(state.examId, state.category || '').then(() => {
+                    categorySelect.value = state.category || '';
+                    loadQuestions(state.examId);
+                });
             }
         });
     });

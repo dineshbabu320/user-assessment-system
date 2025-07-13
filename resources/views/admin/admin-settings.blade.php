@@ -48,19 +48,22 @@
                         </div>  
                         @php
                             $categories = $exam->questions->groupBy('category');
+                            if (!$categories->has('local')) {
+                                $categories = $categories->put('local', collect());
+                            }
                         @endphp
                         @foreach ($categories as $category => $questions)
                             <div class="mb-4">
                                 <label for="category_ratio_{{ $exam->id }}_{{ $loop->index }}" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                                    {{ $category }} ({{ $questions->count() }} questions)
+                                    {{ $category === 'local' ? 'Local Questions' : $category }}
                                 </label>
-                                <input type="number" 
-                                       name="category_ratios[{{ $exam->id }}][{{ $category }}]" 
-                                       id="category_ratio_{{ $exam->id }}_{{ $loop->index }}" 
-                                       value="{{ $exam->category_ratios[$category] ?? '' }}" 
-                                       min="0" 
-                                       max="{{ $exam->question_limit ?? $exam->questions()->count() }}" 
-                                       class="category-input w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
+                                <input type="number"
+                                       name="category_ratios[{{ $exam->id }}][{{ $category }}]"
+                                       id="category_ratio_{{ $exam->id }}_{{ $loop->index }}"
+                                       value="{{ $exam->category_ratios[$category] ?? '' }}"
+                                       min="0"
+                                       max="{{ $exam->question_limit ?? $exam->questions()->count() }}"
+                                       class="category-input w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                                        data-exam-id="{{ $exam->id }}">
                             </div>
                         @endforeach
@@ -89,14 +92,8 @@
 
             // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-
-            // Remove active state from all tabs
             document.querySelectorAll('[data-tab-target]').forEach(tab => tab.classList.remove('text-blue-600', 'border-blue-600', 'dark:text-blue-500', 'dark:border-blue-500'));
-
-            // Show the selected tab content
             target.classList.remove('hidden');
-
-            // Add active state to the clicked tab
             tab.classList.add('text-blue-600', 'border-blue-600', 'dark:text-blue-500', 'dark:border-blue-500');
         });
     });

@@ -11,11 +11,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ExamPassedNotification;
 use Illuminate\Http\Request;
 use App\Helpers\ActivityLogger;
-use Parsedown;
 
 class ManualEvaluationController extends Controller
 {
-    private const ADMIN_EMAIL = 'js.hoo@vat-sea.com';
 
     // List students with pending evaluations
     public function index()
@@ -38,11 +36,6 @@ class ManualEvaluationController extends Controller
             ->where('status', 'pending')
             ->with('question')
             ->get();
-
-        $parsedown = new Parsedown();
-        foreach ($responses as $response) {
-            $response->question->parsed_text = $parsedown->text($response->question->question_text);
-        }
 
         return view('students.manual-evaluation', compact('student', 'responses'));
     }
@@ -99,7 +92,11 @@ class ManualEvaluationController extends Controller
                     $query->where('id', 2);
                 })
                 ->where('subdivision_id', $student->subdivision_id)
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -112,7 +109,11 @@ class ManualEvaluationController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($student) {
                 $q->where('subdivision_id', $student->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')
+            ->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()->toArray();
 
             Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
@@ -127,7 +128,11 @@ class ManualEvaluationController extends Controller
                     $query->where('id', 2);
                 })
                 ->where('subdivision_id', $student->subdivision_id)
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -140,7 +145,12 @@ class ManualEvaluationController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($student) {
                 $q->where('subdivision_id', $student->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')
+            ->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()
+            ->toArray();
 
             Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             
@@ -159,11 +169,6 @@ class ManualEvaluationController extends Controller
 
         if (!auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
-        }
-
-        $parsedown = new Parsedown();
-        foreach ($attempt->responses as $response) {
-            $response->question->parsed_text = $parsedown->text($response->question->question_text);
         }
 
         return view('admin.manual-evaluation-admin', compact('attempt'));
@@ -215,7 +220,11 @@ class ManualEvaluationController extends Controller
                     $query->where('id', 2);
                 })
                 ->where('subdivision_id', $student->subdivision_id)
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -228,7 +237,12 @@ class ManualEvaluationController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($student) {
                 $q->where('subdivision_id', $student->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')
+            ->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()
+            ->toArray();
 
             Mail::to($student->email)->queue(new ExamCompletedNotification($status, $percentage, $title, $customMessage));
             
@@ -243,7 +257,11 @@ class ManualEvaluationController extends Controller
                     $query->where('id', 2);
                 })
                 ->where('subdivision_id', $student->subdivision_id)
-                ->pluck('email')
+                ->pluck('notification_email', 'email')
+                ->map(function($notification_email, $email) {
+                    return $notification_email ?: $email;
+                })
+                ->values()
                 ->toArray();
 
             $percentage=$maxScore > 0 ? round(($totalScore / $maxScore) * 100, 1) : 0;
@@ -256,7 +274,12 @@ class ManualEvaluationController extends Controller
 
             $adminEmails = User::whereHas('subdivisionNotifications', function ($q) use ($student) {
                 $q->where('subdivision_id', $student->subdivision_id);
-            })->pluck('email')->toArray();
+            })->pluck('notification_email', 'email')
+            ->map(function($notification_email, $email) {
+                return $notification_email ?: $email;
+            })
+            ->values()
+            ->toArray();
 
             Mail::to($student->email)->queue(new ExamCompletedNotification( $status, $percentage, $title, $customMessage));
             

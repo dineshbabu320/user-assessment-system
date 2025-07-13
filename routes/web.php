@@ -10,12 +10,12 @@ use App\Http\Controllers\ManualEvaluationController;
 use App\Http\Controllers\StudentHistoryController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\SubdivisionquestionsController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Sentry\Laravel\Tracing\Middleware;
 
-Route::get('/', function() {
-    return view('login');
-})->name('front');
+Route::get('/', function() { return view('login'); })->name('front');
 Route::get('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -25,7 +25,8 @@ Route::middleware(['auth', Middleware::class])->group(function () {
     //DashBoard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/faq', function() { return view('faq'); })->name('faq');
-    
+    Route::get('/user-search', [StudentHistoryController::class, 'search'])->name('user.search');
+
     Route::middleware(['examiner'])->group( function() {
         //Examiner stuff
         Route::get('/examiner/manual-evaluation', [ManualEvaluationController::class, 'index'])->name('student.manualEvaluation');
@@ -33,21 +34,31 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::post('/examiner/manual-evaluation/{cid}/evaluate-all', [ManualEvaluationController::class, 'evaluateAll'])->name('student.evaluateAll');
     });
 
+    // Student profile - accessible by specific roles with proper restrictions
+    Route::get('/student/{cid}', [StudentHistoryController::class, 'index'])
+        ->name('student.studentHistory')
+        ->middleware(['canViewStudentProfile']);
+
     Route::middleware(['subdivisionStaff'])->group(function(){
         //Issue Token
         Route::get('/students/search', [StudentTokenController::class, 'index'])->name('students.search');
         Route::post('/students/issue-token', [StudentTokenController::class, 'issueToken'])->name('students.issueToken');
-        Route::get('/student/{cid}', [StudentHistoryController::class, 'index'])->name('student.studentHistory');
         Route::patch('/tokens/{token}/revoke', [StudentTokenController::class, 'revokeToken'])->name('tokens.revoke');
         Route::get('/students/find', [StudentTokenController::class, 'search'])->name('students.find');
-    });
 
-    Route::middleware(['mentor'])->group(function() {
-        Route::get('/mentor/students/search', [StudentTokenController::class, 'index'])->name('mentor.studentSearch');
-        Route::get('/mentor/student/{cid}', [StudentHistoryController::class, 'index'])->name('mentor.studentHistory');
-        Route::get('/mentor/students/find', [StudentTokenController::class, 'search'])->name('mentors.find');
-    });
+        // QB related
+        Route::get('/subdivision/questions', [SubdivisionquestionsController::class, 'index'])->name('subdivision.questions.index');
+        Route::get('/subdivision/questions/create', [SubdivisionquestionsController::class, 'create'])->name('subdivision.questions.create');
+        Route::post('/subdivision/questions/store', [SubdivisionquestionsController::class, 'store'])->name('subdivision.questions.store');
+        Route::get('/subdivision/questions/{id}/edit', [SubdivisionquestionsController::class, 'edit'])->name('subdivision.questions.edit');
+        Route::put('/subdivision/questions/{id}', [SubdivisionquestionsController::class, 'update'])->name('subdivision.questions.update');
+        Route::delete('/subdivision/questions/{id}', [SubdivisionquestionsController::class, 'destroy'])->name('subdivision.questions.destroy');
+        Route::post('/subdivision/questions/{id}/remove-file', [SubdivisionquestionsController::class, 'removeFile'])->name('subdivision.questions.remove-file');
+        Route::post('/api/subdivision/questions', [SubdivisionquestionsController::class, 'getQuestions'])->name('api.subdivision.questions');
 
+        // Mail settings
+        Route::post('/notifications',[UserController::class, 'updateMailPreferences'])->name('mail.preferences.set');
+    });
 
     Route::get('/my-exams', [ExamController::class, 'myExams'])->name('my-exams');
 
@@ -62,6 +73,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
     Route::get('/exam/{attemptId}/review', [ExamController::class, 'reviewExam'])->name('exam.review');
 
     Route::middleware(['admin'])->group(function() {
+        Route::post('/admin/exams/categories', [QuestionController::class, 'getExamCategories'])->name('admin.exams.categories');
         Route::get('/admin/questions', [QuestionController::class, 'index'])->name('admin.questions.index');
         Route::get('/admin/questions/create/{exam_id}', [QuestionController::class, 'create'])->name('admin.questions.create');
         Route::post('/admin/questions/store', [QuestionController::class, 'store'])->name('admin.questions.store');

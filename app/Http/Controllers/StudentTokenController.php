@@ -18,7 +18,7 @@ class StudentTokenController extends Controller
     public function index()
     {
         $students = User::select('cid', 'name', 'subdivision_name') 
-            ->when(Auth::user()->isSubdivisionStaff() || Auth::user()->isMentor(), function ($q) {
+            ->when(Auth::user()->isSubdivisionStaff(), function ($q) {
                 $q->where('subdivision_id', Auth::user()->subdivision_id);
             })
             ->paginate(10);
@@ -33,7 +33,7 @@ class StudentTokenController extends Controller
 
         if ($query) {
             $students = User::query()
-                ->when(Auth::user()->isSubdivisionStaff() || Auth::user()->isMentor(), function ($q) {
+                ->when(Auth::user()->isSubdivisionStaff(), function ($q) {
                     $q->where('subdivision_id', Auth::user()->subdivision_id);
                 })
                 ->when(is_numeric($query), function($q) use ($query) {
@@ -71,7 +71,6 @@ class StudentTokenController extends Controller
         $tokenId = $request->input('token_id');
         $examId = substr($tokenId, strrpos($tokenId, '-') + 1);
 
-        // Check for active tokens
         $activeToken = Token::where('id', '=',$tokenId)
                     ->where('status', '=','active')
                     ->where('user_cid', $request->user_cid)
@@ -81,7 +80,6 @@ class StudentTokenController extends Controller
             return redirect()->back()->with('error','The user already has an active token for the exam');
         }
 
-        // Ensure the exam_id exists in the exams table
         $exam = Exam::where('name', $examId)->first();
         if (!$exam) {
             return redirect()->back()->with('error', "Invalid exam ID '{$examId}' in the token.");

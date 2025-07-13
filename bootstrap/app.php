@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subdivisionStaff' => \App\Http\Middleware\SubdivisionStaff::class,
             'examiner' => \App\Http\Middleware\Examiner::class,
             'admin' => \App\Http\Middleware\Admin::class,
-            'canViewStudentProfile' => \App\Http\Middleware\CanViewStudentProfile::class,
+            'canViewStudentProfile' => \App\Http\Middleware\canViewStudentProfile::class,
             'mentor' => \App\Http\Middleware\Mentor::class,
         ]);
     })

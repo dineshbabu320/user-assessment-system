@@ -75,7 +75,9 @@
                             <div class="mb-4">
                                 <label for="category_ratio_{{ $exam->id }}_{{ $category }}" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                                     {{ $category === 'local' ? 'Local Questions' : ucfirst($category) }} 
-                                    <span class="text-gray-500 font-normal">({{ $questionCount }} available)</span>
+                                    @if($category !== 'local')
+                                        <span class="text-gray-500 font-normal">({{ $questionCount }} available)</span>
+                                    @endif
                                 </label>
                                 <input type="number"
                                        name="category_ratios[{{ $exam->id }}][{{ $category }}]"

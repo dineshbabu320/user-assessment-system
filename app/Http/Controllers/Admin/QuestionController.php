@@ -28,7 +28,6 @@ class QuestionController extends Controller
 
     public function getQuestions(Request $request)
     {
-
         $request->validate([
             'exam_id' => 'required|exists:exams,id',
         ]);
@@ -36,18 +35,29 @@ class QuestionController extends Controller
         $exam = Exam::findOrFail($request->exam_id);
 
         $query = $exam->questions()->with('answers')->whereNull('subdivision_id');
+        
         if ($request->filled('category')) {
-            $query->where('category', $request->category); // filter by category if selected
+            $query->where('category', $request->category);
         }
-        $questions = $query->paginate(10); 
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('question_text', 'LIKE', "%{$search}%")
+                  ->orWhere('category', 'LIKE', "%{$search}%")
+                  ->orWhere('answer_key', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $questions = $query->paginate(10);
+        $totalQuestions = $questions->total();
 
         $questions->getCollection()->transform(function ($question) {
             return [
                 'id' => $question->id,
                 'question_text' => $question->question_text,
                 'question_type' => $question->question_type,
-                'options' => $question->options ? json_decode($question->options, true) : [],
-                'correct_answers' => $question->answers->where('is_correct', true)->pluck('answer_text')->toArray(),
+                'category' => $question->category,
                 'points' => $question->points,
             ];
         });
@@ -55,6 +65,7 @@ class QuestionController extends Controller
         return response()->json([
             'questions' => $questions->items(),
             'pagination' => $questions->links('pagination::tailwind')->render(),
+            'total' => $totalQuestions,
         ]);
     }
 

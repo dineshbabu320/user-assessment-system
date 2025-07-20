@@ -14,6 +14,11 @@ class Subdivision extends Model
 
     public function users(): HasMany
     {
-        return $this->hasMany(User::class, 'subdivision_id');
+        return $this->hasMany(User::class, 'subdivision_id', 'name');
+    }
+
+    public function questions(): HasMany
+    {
+        return $this->hasMany(Question::class, 'subdivision_id', 'name');
     }
 }

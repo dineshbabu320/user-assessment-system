@@ -46,29 +46,57 @@
                                 <p class="text-sm text-yellow-500 mt-2">This exam has no questions. Please add questions before setting the question limit.</p>
                             @endif
                         </div>  
+                        
                         @php
-                            $categories = $exam->questions->groupBy('category');
-                            if (!$categories->has('local')) {
-                                $categories = $categories->put('local', collect());
+                            // Get unique categories with question counts
+                            $categories = $exam->questions()
+                                ->selectRaw('category, COUNT(*) as question_count')
+                                ->whereNotNull('category')
+                                ->where('category', '!=', '')
+                                ->groupBy('category')
+                                ->get()
+                                ->pluck('question_count', 'category')
+                                ->toArray();
+                            
+                            // Always include 'local' category even if no questions exist
+                            if (!isset($categories['local'])) {
+                                $categories['local'] = 0;
                             }
+                            
+                            // Sort categories to show 'local' last
+                            uksort($categories, function($a, $b) {
+                                if ($a === 'local') return 1;
+                                if ($b === 'local') return -1;
+                                return strcmp($a, $b);
+                            });
                         @endphp
-                        @foreach ($categories as $category => $questions)
+                        
+                        @foreach ($categories as $category => $questionCount)
                             <div class="mb-4">
-                                <label for="category_ratio_{{ $exam->id }}_{{ $loop->index }}" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                                    {{ $category === 'local' ? 'Local Questions' : $category }}
+                                <label for="category_ratio_{{ $exam->id }}_{{ $category }}" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                                    {{ $category === 'local' ? 'Local Questions' : ucfirst($category) }} 
+                                    <span class="text-gray-500 font-normal">({{ $questionCount }} available)</span>
                                 </label>
                                 <input type="number"
                                        name="category_ratios[{{ $exam->id }}][{{ $category }}]"
-                                       id="category_ratio_{{ $exam->id }}_{{ $loop->index }}"
-                                       value="{{ $exam->category_ratios[$category] ?? '' }}"
+                                       id="category_ratio_{{ $exam->id }}_{{ $category }}"
+                                       value="{{ $exam->category_ratios[$category] ?? 0 }}"
                                        min="0"
-                                       max="{{ $exam->question_limit ?? $exam->questions()->count() }}"
+                                       max="{{ min($questionCount, $exam->question_limit ?? $exam->questions()->count()) }}"
                                        class="category-input w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                                       data-exam-id="{{ $exam->id }}">
+                                       data-exam-id="{{ $exam->id }}"
+                                       data-available="{{ $questionCount }}">
+                                @if($questionCount === 0)
+                                    <p class="text-sm text-yellow-500 mt-1">No questions available in this category</p>
+                                @endif
                             </div>
                         @endforeach
+                        
                         <div id="warning_{{ $exam->id }}" class="text-yellow-500 text-sm hidden">
                             The sum of category questions must equal the total number of questions set.
+                        </div>
+                        <div id="error_{{ $exam->id }}" class="text-red-500 text-sm hidden">
+                            Some categories don't have enough questions available.
                         </div>
                         <input type="hidden" id="category_sum_{{ $exam->id }}" name="category_sum[{{ $exam->id }}]" value="0">
                     </div>
@@ -109,11 +137,18 @@
 
             const categoryInputsForExam = document.querySelectorAll(`.category-input[data-exam-id="${examId}"]`);
             let sum = 0;
+            let hasInsufficientQuestions = false;
 
             categoryInputsForExam.forEach(categoryInput => {
                 const value = parseInt(categoryInput.value, 10);
+                const available = parseInt(categoryInput.getAttribute('data-available'), 10);
+                
                 if (!isNaN(value)) {
                     sum += value;
+                    // Check if requested questions exceed available
+                    if (value > available) {
+                        hasInsufficientQuestions = true;
+                    }
                 }
             });
 
@@ -121,9 +156,20 @@
             const hiddenInput = document.querySelector(`#category_sum_${examId}`);
             hiddenInput.value = sum;
 
-            // Show or hide the warning message
+            // Show or hide warning/error messages
             const warning = document.querySelector(`#warning_${examId}`);
-            if (sum > totalQuestions) {
+            const error = document.querySelector(`#error_${examId}`);
+            
+            // Reset all messages
+            warning.classList.add('hidden');
+            error.classList.add('hidden');
+            hiddenInput.setCustomValidity('');
+
+            if (hasInsufficientQuestions) {
+                error.textContent = 'Some categories don\'t have enough questions available.';
+                error.classList.remove('hidden');
+                hiddenInput.setCustomValidity('Some categories don\'t have enough questions available.');
+            } else if (sum > totalQuestions) {
                 warning.textContent = 'The sum of category questions cannot exceed the total number of questions.';
                 warning.classList.remove('hidden');
                 hiddenInput.setCustomValidity('The sum of category questions cannot exceed the total number of questions.');
@@ -131,9 +177,6 @@
                 warning.textContent = 'The sum of category questions must equal the total number of questions.';
                 warning.classList.remove('hidden');
                 hiddenInput.setCustomValidity('The sum of category questions must equal the total number of questions.');
-            } else {
-                warning.classList.add('hidden');
-                hiddenInput.setCustomValidity(''); // Clear custom validity
             }
         };
 
@@ -150,24 +193,21 @@
             input.addEventListener('input', () => {
                 const examId = input.id.replace('question_limit_', '');
                 validateCategoryRatios(examId);
-            });
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const totalQuestionsInputs = document.querySelectorAll('[id^="question_limit_"]');
-
-        totalQuestionsInputs.forEach(input => {
-            input.addEventListener('input', () => {
-                const examId = input.id.replace('question_limit_', '');
+                
+                // Update max attributes for category inputs
                 const newLimit = parseInt(input.value, 10);
-
-                // Update the max attribute of all category inputs for this exam
                 const categoryInputs = document.querySelectorAll(`.category-input[data-exam-id="${examId}"]`);
                 categoryInputs.forEach(categoryInput => {
-                    categoryInput.setAttribute('max', newLimit);
+                    const available = parseInt(categoryInput.getAttribute('data-available'), 10);
+                    categoryInput.setAttribute('max', Math.min(available, newLimit));
                 });
             });
+        });
+
+        // Initial validation for all exams
+        totalQuestionsInputs.forEach(input => {
+            const examId = input.id.replace('question_limit_', '');
+            validateCategoryRatios(examId);
         });
     });
 </script>

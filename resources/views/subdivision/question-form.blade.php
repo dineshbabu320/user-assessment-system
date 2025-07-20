@@ -35,7 +35,6 @@
             @endif
 
             <input type="hidden" name="exam_id" value="{{ $exam_id }}">
-            <input type="hidden" name="subdivision_id" value="{{ auth()->user()->subdivision_id }}">
             <input type="hidden" name="category" value="local">
 
             <!-- Question Text -->
@@ -635,6 +634,28 @@
                         <option value="text" {{ old('question_type', $question->question_type ?? '') === 'text' ? 'selected' : '' }}>Text</option>
                     </select>
                 </div>
+
+                <!-- Subdivision -->
+                @if (auth()->user()->isAdmin())
+                <div>
+                    <label for="subdivision_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Subdivision
+                        <span class="text-red-500">*</span></label>
+                    <select name="subdivision_id" id="subdivision_id"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                        required>
+                        <option disabled {{ !isset($question) ? 'selected' : '' }}>Select Subdivision</option>
+                        @foreach ($subdivisions as $subdivision)
+                            <option value="{{ $subdivision->name }}" 
+                                {{ old('subdivision_id', $question->subdivision_id ?? '') === $subdivision->name ? 'selected' : '' }}>
+                                {{ $subdivision->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @else
+                <!-- Hidden field for regular users - uses their subdivision -->
+                <input type="hidden" name="subdivision_id" value="{{ auth()->user()->subdivision_id }}">
+                @endif
 
                 <!-- Options -->
                 <div id="options-container"

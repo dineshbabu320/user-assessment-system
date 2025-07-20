@@ -55,6 +55,7 @@ Route::middleware(['auth', Middleware::class])->group(function () {
         Route::delete('/subdivision/questions/{id}', [SubdivisionquestionsController::class, 'destroy'])->name('subdivision.questions.destroy');
         Route::post('/subdivision/questions/{id}/remove-file', [SubdivisionquestionsController::class, 'removeFile'])->name('subdivision.questions.remove-file');
         Route::post('/api/subdivision/questions', [SubdivisionquestionsController::class, 'getQuestions'])->name('api.subdivision.questions');
+        Route::post('/subdivision/exams/subdivisions', [SubdivisionquestionsController::class, 'getExamSubdivisions'])->name('subdivision.exams.subdivisions');
 
         // Mail settings
         Route::post('/notifications',[UserController::class, 'updateMailPreferences'])->name('mail.preferences.set');

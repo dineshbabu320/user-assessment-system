@@ -464,6 +464,7 @@ class ExamController extends Controller
             $alreadySelectedIds = $selectedQuestions->pluck('id')->toArray();
             $randomQs = $exam->questions()
                 ->whereNotIn('id', $alreadySelectedIds)
+                ->where('category', '!=', 'local')
                 ->inRandomOrder()
                 ->take($shortfall)
                 ->get();

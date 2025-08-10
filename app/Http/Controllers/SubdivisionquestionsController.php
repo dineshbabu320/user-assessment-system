@@ -45,14 +45,16 @@ class SubdivisionquestionsController extends Controller
             'exam_id' => 'required|exists:exams,id',
             'question_text' => 'required|string',
             'question_type' => 'required|string',
-            'options' => 'nullable|string',
-            'correct_answers' => 'nullable|string',
-            'points' => 'required|integer',
+            // Follow admin logic: options/correct_answers required for mcq/single
+            'options' => 'required_if:question_type,mcq,single|nullable|string',
+            'correct_answers' => 'required_if:question_type,mcq,single|nullable|string',
+            'points' => 'required|integer|min:1',
             'file' => 'nullable|file',
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
             'answer_key' => 'nullable|string',
-            'additional_exams' => 'array',
+            'additional_exams' => 'nullable|array',
+            'additional_exams.*' => 'exists:exams,id',
         ];
 
         // Only admins can choose subdivision, others use their own
@@ -73,18 +75,28 @@ class SubdivisionquestionsController extends Controller
             $data['file_path'] = $request->file('file')->store('questions', 'public');
         }
 
-        if (!empty($data['options'])) {
-            $data['options'] = json_encode(array_map('trim', explode('|', $data['options'])));
+        // Prepare options and correct answers arrays (like admin flow)
+        $options = $request->question_type !== 'text' && $request->options
+            ? array_map('trim', explode('|', $request->options))
+            : null;
+        $correctAnswers = $request->question_type !== 'text' && $request->correct_answers
+            ? array_map('trim', explode('|', $request->correct_answers))
+            : null;
+
+        if (!empty($options)) {
+            $data['options'] = json_encode($options);
+        } else {
+            $data['options'] = null;
         }
 
         $question = Question::create($data);
 
-        if (in_array($data['question_type'], ['mcq', 'single']) && !empty($data['correct_answers'])) {
-            $answers = array_map('trim', explode('|', $data['correct_answers']));
-            foreach ($answers as $answerText) {
+        // Create answers for all options, marking correct ones
+        if (in_array($data['question_type'], ['mcq', 'single']) && $options) {
+            foreach ($options as $option) {
                 $question->answers()->create([
-                    'answer_text' => $answerText,
-                    'is_correct' => true,
+                    'answer_text' => $option,
+                    'is_correct' => $correctAnswers && in_array($option, $correctAnswers),
                 ]);
             }
         }
@@ -95,6 +107,16 @@ class SubdivisionquestionsController extends Controller
                 $copy = $question->replicate();
                 $copy->exam_id = $otherExamId;
                 $copy->save();
+
+                // Copy answers as well
+                if (in_array($data['question_type'], ['mcq', 'single']) && $options) {
+                    foreach ($options as $option) {
+                        $copy->answers()->create([
+                            'answer_text' => $option,
+                            'is_correct' => $correctAnswers && in_array($option, $correctAnswers),
+                        ]);
+                    }
+                }
             }
         }
 
@@ -137,9 +159,9 @@ class SubdivisionquestionsController extends Controller
             'subdivision_id' => 'required|string',
             'question_text' => 'required|string',
             'question_type' => 'required|string',
-            'options' => 'nullable|string',
-            'correct_answers' => 'nullable|string',
-            'points' => 'required|integer',
+            'options' => 'required_if:question_type,mcq,single|nullable|string',
+            'correct_answers' => 'required_if:question_type,mcq,single|nullable|string',
+            'points' => 'required|integer|min:1',
             'file' => 'nullable|file',
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
@@ -150,21 +172,46 @@ class SubdivisionquestionsController extends Controller
             $data['file_path'] = $request->file('file')->store('questions', 'public');
         }
 
-        if (!empty($data['options'])) {
-            $data['options'] = json_encode(array_map('trim', explode('|', $data['options'])));
+        // Prepare options and correct answers arrays (like admin flow)
+        $options = $request->question_type !== 'text' && $request->options
+            ? array_map('trim', explode('|', $request->options))
+            : null;
+        $correctAnswers = $request->question_type !== 'text' && $request->correct_answers
+            ? array_map('trim', explode('|', $request->correct_answers))
+            : null;
+
+        if (!empty($options)) {
+            $data['options'] = json_encode($options);
+        } else {
+            $data['options'] = null;
         }
 
         $question->update($data);
 
-        $question->answers()->delete();
-        if (in_array($data['question_type'], ['mcq', 'single']) && !empty($data['correct_answers'])) {
-            $answers = array_map('trim', explode('|', $data['correct_answers']));
-            foreach ($answers as $answerText) {
-                $question->answers()->create([
-                    'answer_text' => $answerText,
-                    'is_correct' => true,
-                ]);
+        // Upsert answers: update/create for each option, delete removed ones
+        if (in_array($data['question_type'], ['mcq', 'single']) && $options) {
+            $existingAnswers = $question->answers()->get()->keyBy('answer_text');
+            $updatedAnswerTexts = [];
+
+            foreach ($options as $option) {
+                $isCorrect = $correctAnswers && in_array($option, $correctAnswers);
+
+                if ($existingAnswers->has($option)) {
+                    $answer = $existingAnswers->get($option);
+                    $answer->update(['is_correct' => $isCorrect]);
+                } else {
+                    $question->answers()->create([
+                        'answer_text' => $option,
+                        'is_correct' => $isCorrect,
+                    ]);
+                }
+                $updatedAnswerTexts[] = $option;
             }
+
+            $question->answers()->whereNotIn('answer_text', $updatedAnswerTexts)->delete();
+        } else {
+            // For text questions, ensure no stale answers remain
+            $question->answers()->delete();
         }
 
         return redirect()->route('subdivision.questions.index', ['exam_id' => $data['exam_id']])

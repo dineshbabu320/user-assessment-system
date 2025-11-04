@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Token;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -32,15 +33,13 @@ class DashboardController extends Controller
 
         $subdivisionName = $user->subdivision_name;
         $subdivisionID = $user->subdivision_id;
-
-        // Get user's token status
+        
         $active_token = Token::where('user_cid', $user->cid)
             ->where('expires_at', '>', now())
             ->where('id', 'LIKE', 'READY-%')
             ->where('status', 'active')
             ->first();
 
-        // Get user's exam attempts
         $exam_attempts = Attempt::where('user_cid', $user->cid)
             ->orderBy('attempted_at', 'desc')
             ->paginate(5);
@@ -49,22 +48,50 @@ class DashboardController extends Controller
         $recentAttempts = collect();
 
         if ($user->isAdmin()) {
-            $recentAttempts = Attempt::with(['user', 'exam'])
+            $allAttempts = Attempt::with(['user', 'exam'])
                 ->where('user_cid', '!=', $user->cid)
                 ->orderBy('attempted_at', 'desc')
                 ->take(30)
-                ->get()
-                ->simplePaginate(5, ['*'], 'recent_attempts_page');
+                ->get();
+                
+            $currentPage = request()->get('recent_attempts_page', 1);
+            $perPage = 5;
+            $currentItems = $allAttempts->slice(($currentPage - 1) * $perPage, $perPage);
+            
+            $recentAttempts = new LengthAwarePaginator(
+                $currentItems,
+                $allAttempts->count(),
+                $perPage,
+                $currentPage,
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'recent_attempts_page'
+                ]
+            );
         } elseif ($user->isSubdivisionStaff() || $user->isMentor()) {
-            $recentAttempts = Attempt::with(['user', 'exam'])
+            $allAttempts = Attempt::with(['user', 'exam'])
                 ->whereHas('user', function ($q) use ($user) {
                     $q->where('subdivision_id', $user->subdivision_id);
                 })
                 ->where('user_cid', '!=', $user->cid)
                 ->orderBy('attempted_at', 'desc')
                 ->take(30)
-                ->get()
-                ->simplePaginate(5, ['*'], 'recent_attempts_page');
+                ->get();
+                
+            $currentPage = request()->get('recent_attempts_page', 1);
+            $perPage = 5;
+            $currentItems = $allAttempts->slice(($currentPage - 1) * $perPage, $perPage);
+            
+            $recentAttempts = new LengthAwarePaginator(
+                $currentItems,
+                $allAttempts->count(),
+                $perPage,
+                $currentPage,
+                [
+                    'path' => request()->url(),
+                    'pageName' => 'recent_attempts_page'
+                ]
+            );
         }
 
         return view('dashboard', compact(

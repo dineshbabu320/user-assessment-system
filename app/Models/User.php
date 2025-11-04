@@ -1,11 +1,11 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use League\OAuth2\Client\Token\AccessToken;
 use App\Http\Controllers\OAuthController;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use League\OAuth2\Client\Token\AccessToken;
 
 class User extends Authenticatable
 {
@@ -21,9 +21,17 @@ class User extends Authenticatable
         'email',
         'atc_rating',
         'subdivision_id',
+        'access_token',
+        'refresh_token',
+        'token_expires_at',
     ];
 
-    public function tokens() {
+    protected $casts = [
+        'token_expires_at' => 'datetime',
+    ];
+
+    public function tokens()
+    {
         return $this->hasMany(Token::class, 'user_cid');
     }
 
@@ -44,7 +52,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class,'role_user', 'user_cid', 'role_id');
+        return $this->belongsToMany(Role::class, 'role_user', 'user_cid', 'role_id');
     }
 
     public function responses()
@@ -89,12 +97,13 @@ class User extends Authenticatable
 
     public function getTokenAttribute()
     {
-        if ($this->access_token === null) return null;
+        if ($this->access_token === null)
+            return null;
         else {
             $token = new AccessToken([
                 'access_token' => $this->access_token,
                 'refresh_token' => $this->refresh_token,
-                'expires' => $this->token_expires,
+                'expires' => $this->token_expires_at ? $this->token_expires_at->timestamp : null,
             ]);
 
             if ($token->hasExpired()) {
@@ -106,7 +115,7 @@ class User extends Authenticatable
             $this->update([
                 'access_token' => ($token) ? $token->getToken() : null,
                 'refresh_token' => ($token) ? $token->getRefreshToken() : null,
-                'token_expires' => ($token) ? $token->getExpires() : null,
+                'token_expires_at' => ($token && $token->getExpires()) ? \Carbon\Carbon::createFromTimestamp($token->getExpires()) : null,
             ]);
 
             return $token;

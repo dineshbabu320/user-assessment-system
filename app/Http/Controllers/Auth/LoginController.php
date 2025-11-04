@@ -36,7 +36,11 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        if (! $request->has('code') || ! $request->has('state')) {
+        if (auth()->check()) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        if (!$request->has('code') || !$request->has('state')) {
             $authorizationUrl = $this->provider->getAuthorizationUrl([
                 'required_scopes' => implode(' ', config('oauth.scopes')),
                 'scope' => implode(' ', config('oauth.scopes')),
@@ -72,7 +76,11 @@ class LoginController extends Controller
             return redirect()->route('front')->withErrors('You are not authorized to access this system.');
         }
 
-        $account = $this->completeLogin($resourceOwner->data, $accessToken);
+        try {
+            $account = $this->completeLogin($resourceOwner->data, $accessToken);
+        } catch (\Exception $e) {
+            return redirect()->route('front')->withErrors($e->getMessage());
+        }
 
         // Login the user and don't remember the session forever
         auth()->login($account, false);
@@ -94,12 +102,22 @@ class LoginController extends Controller
         $account->email = $data->personal->email;
         $account->atc_rating = $data->vatsim->rating->id;
 
+        $account->access_token = $token->getToken();
+        $account->refresh_token = $token->getRefreshToken();
+        $account->token_expires_at = $token->getExpires() ?
+            \Carbon\Carbon::createFromTimestamp($token->getExpires()) : null;
+
         // For VATGOV
         if ($data->vatsim->rating->id == 12) {
             $account->subdivision_id = "NIL";
             $account->subdivision_name = "NIL";
             $account->roles()->syncWithoutDetaching([3]);
         } else {
+            // Check if subdivision data exists
+            if (!isset($data->vatsim->subdivision) || !isset($data->vatsim->subdivision->id) || empty($data->vatsim->subdivision->id)) {
+                throw new \Exception('You are not assigned to a subdivision yet. Please contact staff members to have your subdivision assignment completed before accessing the system.');
+            }
+
             $account->subdivision_id = $data->vatsim->subdivision->id;
             $account->subdivision_name = $data->vatsim->subdivision->name;
         }
@@ -112,6 +130,44 @@ class LoginController extends Controller
         $account->save();
 
         return $account;
+    }
+
+    /**
+     * Refresh the user's access token if needed
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    protected function refreshTokenIfNeeded($user)
+    {
+        if (
+            !$user->token_expires_at ||
+            $user->token_expires_at->subMinutes(10)->isPast()
+        ) {
+
+            if (!$user->refresh_token) {
+                return false;
+            }
+
+            try {
+                $newToken = $this->provider->getAccessToken('refresh_token', [
+                    'refresh_token' => $user->refresh_token
+                ]);
+
+                // Update user's tokens
+                $user->access_token = $newToken->getToken();
+                $user->refresh_token = $newToken->getRefreshToken() ?: $user->refresh_token;
+                $user->token_expires_at = $newToken->getExpires() ?
+                    \Carbon\Carbon::createFromTimestamp($newToken->getExpires()) : null;
+                $user->save();
+
+                return true;
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+
+        return true; // Token is still valid
     }
 
     /**

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Attempt;
 use App\Models\Token;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -45,23 +45,23 @@ class DashboardController extends Controller
                             ->orderBy('attempted_at', 'desc')
                             ->paginate(5);
 
-        // Recent attempts logic (last 7 days, paginated)
+        // Recent attempts logic (last 30 attempts, paginated)
         $recentAttempts = collect();
 
         if ($user->isAdmin()) {
             $recentAttempts = Attempt::with(['user', 'exam'])
-                ->where('attempted_at', '>=', now()->subDays(7))
                 ->where('user_cid', '!=', $user->cid)
                 ->orderBy('attempted_at', 'desc')
+                ->limit(30)
                 ->paginate(5, ['*'], 'recent_attempts_page');
         } elseif ($user->isSubdivisionStaff() || $user->isMentor()) {
             $recentAttempts = Attempt::with(['user', 'exam'])
                 ->whereHas('user', function($q) use ($user) {
                     $q->where('subdivision_id', $user->subdivision_id);
                 })
-                ->where('attempted_at', '>=', now()->subDays(7))
                 ->where('user_cid', '!=', $user->cid)
                 ->orderBy('attempted_at', 'desc')
+                ->limit(30)
                 ->paginate(5, ['*'], 'recent_attempts_page');
         }
 

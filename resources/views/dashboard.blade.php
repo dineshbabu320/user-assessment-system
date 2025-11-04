@@ -108,7 +108,7 @@
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-white uppercase bg-cyan-900 dark:bg-cyan-900 dark:text-white">
                     <tr>
-                        <th colspan="6" class="px-6 py-3 text-lg">Recent Exam Attempts (Last 7 days)</th>
+                        <th colspan="6" class="px-6 py-3 text-lg">Recent Exam Attempts (Last 30 attempts)</th>
                     </tr>
                 </thead>
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white">

@@ -101,17 +101,18 @@ class SubdivisionquestionsController extends Controller
             }
         }
 
-        // Copy question to additional exams, just 3 lines lah
+        // Add the question to additional exams
         if (!empty($data['additional_exams'])) {
             foreach ($data['additional_exams'] as $otherExamId) {
-                $copy = $question->replicate();
-                $copy->exam_id = $otherExamId;
-                $copy->save();
+                $additionalData = $data;
+                $additionalData['exam_id'] = $otherExamId;
+                
+                $additionalQuestion = Question::create($additionalData);
 
-                // Copy answers as well
+                // Create answers for the additional question
                 if (in_array($data['question_type'], ['mcq', 'single']) && $options) {
                     foreach ($options as $option) {
-                        $copy->answers()->create([
+                        $additionalQuestion->answers()->create([
                             'answer_text' => $option,
                             'is_correct' => $correctAnswers && in_array($option, $correctAnswers),
                         ]);

@@ -110,9 +110,6 @@ class LoginController extends Controller
         $account->token_expires_at = $token->getExpires() ?
             \Carbon\Carbon::createFromTimestamp($token->getExpires()) : null;
 
-        $isNew = !$account->exists;
-        $account->save();
-
         // For VATGOV
         if ($data->vatsim->rating->id == 12) {
             if (isset($data->vatsim->subdivision) && isset($data->vatsim->subdivision->id) && !empty($data->vatsim->subdivision->id)) {
@@ -122,7 +119,6 @@ class LoginController extends Controller
                 $account->subdivision_id = "NIL";
                 $account->subdivision_name = "NIL";
             }
-            $account->roles()->syncWithoutDetaching([3]);
         } else {
             // Check if subdivision data exists
             if (!isset($data->vatsim->subdivision) || !isset($data->vatsim->subdivision->id) || empty($data->vatsim->subdivision->id)) {
@@ -133,11 +129,17 @@ class LoginController extends Controller
             $account->subdivision_name = $data->vatsim->subdivision->name;
         }
 
+        $isNew = !$account->exists;
+        $account->save();
+
+        // Assign roles after saving
+        if ($data->vatsim->rating->id == 12) {
+            $account->roles()->syncWithoutDetaching([3]);
+        }
+
         if ($isNew) {
             $account->roles()->syncWithoutDetaching([1]);
         }
-
-        $account->save();
 
         return $account;
     }

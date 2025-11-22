@@ -72,7 +72,10 @@ class LoginController extends Controller
         }
 
         $resourceOwner = json_decode(json_encode($this->provider->getResourceOwner($accessToken)->toArray()));
-        if ($resourceOwner->data->vatsim->division->id !== 'SEA' || $resourceOwner->data->vatsim->rating->id<1) {
+        $isAuthorized = $resourceOwner->data->vatsim->division->id === 'SEA' || $resourceOwner->data->vatsim->rating->id == 12;
+        $isSuspended = $resourceOwner->data->vatsim->rating->id < 1;
+
+        if (!$isAuthorized || $isSuspended) {
             return redirect()->route('front')->withErrors('You are not authorized to access this system.');
         }
 
@@ -107,10 +110,18 @@ class LoginController extends Controller
         $account->token_expires_at = $token->getExpires() ?
             \Carbon\Carbon::createFromTimestamp($token->getExpires()) : null;
 
+        $isNew = !$account->exists;
+        $account->save();
+
         // For VATGOV
         if ($data->vatsim->rating->id == 12) {
-            $account->subdivision_id = "NIL";
-            $account->subdivision_name = "NIL";
+            if (isset($data->vatsim->subdivision) && isset($data->vatsim->subdivision->id) && !empty($data->vatsim->subdivision->id)) {
+                $account->subdivision_id = $data->vatsim->subdivision->id;
+                $account->subdivision_name = $data->vatsim->subdivision->name;
+            } else {
+                $account->subdivision_id = "NIL";
+                $account->subdivision_name = "NIL";
+            }
             $account->roles()->syncWithoutDetaching([3]);
         } else {
             // Check if subdivision data exists
@@ -122,8 +133,7 @@ class LoginController extends Controller
             $account->subdivision_name = $data->vatsim->subdivision->name;
         }
 
-        if (!$account->exists) {
-            $account->save();
+        if ($isNew) {
             $account->roles()->syncWithoutDetaching([1]);
         }
 

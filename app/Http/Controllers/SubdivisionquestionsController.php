@@ -11,7 +11,17 @@ class SubdivisionquestionsController extends Controller
 {
     public function index(Request $request)
     {
-        $exam_id = $request->exam_id ?? Exam::first()->id;
+        if (auth()->user()->isAdmin()) {
+            $exams = Exam::all();
+        } else {
+            $exams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->get();
+        }
+
+        if ($request->has('exam_id') && !$exams->contains('id', $request->exam_id)) {
+            abort(403, 'Unauthorized exam access.');
+        }
+
+        $exam_id = $request->exam_id ?? ($exams->first()->id ?? null);
         
         // Build the base query
         $query = Question::where('exam_id', $exam_id)->with('answers');
@@ -26,15 +36,25 @@ class SubdivisionquestionsController extends Controller
         
         $questions = $query->get();
 
-        $exams = Exam::all();
         $subdivisions = Subdivision::orderBy('name')->pluck('name');
         return view('subdivision.questions', compact('questions', 'exam_id', 'exams', 'subdivisions'));
     }
 
     public function create(Request $request)
     {
-        $exam_id = $request->exam_id ?? Exam::first()->id;
-        $allExams = Exam::where('id', '!=', $exam_id)->get();
+        if (auth()->user()->isAdmin()) {
+            $exams = Exam::all();
+        } else {
+            $exams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->get();
+        }
+
+        if ($request->has('exam_id') && !$exams->contains('id', $request->exam_id)) {
+            abort(403, 'Unauthorized exam access.');
+        }
+
+        $exam_id = $request->exam_id ?? ($exams->first()->id ?? null);
+        $allExams = $exams->where('id', '!=', $exam_id);
+
         $subdivisions = Subdivision::orderBy('name')->get();
         return view('subdivision.question-form', compact('exam_id', 'allExams', 'subdivisions'));
     }
@@ -64,12 +84,29 @@ class SubdivisionquestionsController extends Controller
 
         $data = $request->validate($validationRules);
 
-        // If not admin, force their subdivision
+        // If not admin, force their subdivision and validate exam IDs
         if (!auth()->user()->isAdmin()) {
             $data['subdivision_id'] = auth()->user()->subdivision_id;
+            
+            $allowedExams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->pluck('id')->toArray();
+            if (!in_array($data['exam_id'], $allowedExams)) {
+                abort(403, 'You are not authorized to create questions for this exam.');
+            }
+            if (!empty($data['additional_exams'])) {
+                foreach ($data['additional_exams'] as $otherExamId) {
+                    if (!in_array($otherExamId, $allowedExams)) {
+                        abort(403, 'You are not authorized to add questions to one of the additional exams.');
+                    }
+                }
+            }
         }
         
         $data['category'] = 'local';
+
+        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');
@@ -129,15 +166,18 @@ class SubdivisionquestionsController extends Controller
     {
         if (auth()->user()->isAdmin()) {
             $question = Question::where('id', $id)->with('answers')->firstOrFail();
+            $exams = Exam::all();
         } else {
             $question = Question::where('id', $id)
                 ->where('subdivision_id', auth()->user()->subdivision_id)
                 ->with('answers')
                 ->firstOrFail();
+            $exams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->get();
         }
 
         $exam_id = $question->exam_id;
-        $allExams = Exam::where('id', '!=', $exam_id)->get();
+        $allExams = $exams->where('id', '!=', $exam_id);
+        
         $subdivisions = Subdivision::orderBy('name')->get();
 
         return view('subdivision.question-form', compact('question', 'exam_id', 'allExams', 'subdivisions'));
@@ -168,6 +208,18 @@ class SubdivisionquestionsController extends Controller
             'wrong_comment' => 'nullable|string',
             'answer_key' => 'nullable|string',
         ]);
+
+        if (!auth()->user()->isAdmin()) {
+            $allowedExams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->pluck('id')->toArray();
+            if (!in_array($data['exam_id'], $allowedExams)) {
+                abort(403, 'You are not authorized to assign questions to this exam.');
+            }
+        }
+
+        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');
@@ -268,47 +320,5 @@ class SubdivisionquestionsController extends Controller
         return response()->json(['subdivisions' => $subdivisions]);
     }
 
-    public function getQuestions(Request $request)
-    {
-        $request->validate([
-            'exam_id' => 'required|exists:exams,id',
-            'search' => 'nullable|string|max:255',
-        ]);
 
-        $query = Question::where('exam_id', $request->exam_id)->where('category','local');
-
-        // If admin, use selected subdivision; else use user's subdivision
-        if (auth()->user()->isAdmin()) {
-            if ($request->filled('subdivision_id')) {
-                $query->where('subdivision_id', $request->subdivision_id);
-            }
-        } else {
-            $query->where('subdivision_id', auth()->user()->subdivision_id);
-        }
-
-        // Add search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where('question_text', 'LIKE', '%' . $searchTerm . '%');
-        }
-
-        $questions = $query->with('answers')->paginate(10);
-        $total = $query->count();
-
-        $questions->getCollection()->transform(function ($question) {
-            return [
-                'id' => $question->id,
-                'question_text' => $question->question_text,
-                'question_type' => $question->question_type,
-                'subdivision_id' => $question->subdivision_id,
-                'points' => $question->points,
-            ];
-        });
-
-        return response()->json([
-            'questions' => $questions->items(),
-            'pagination' => $questions->links('pagination::tailwind')->render(),
-            'total' => $total,
-        ]);
-    }
 }

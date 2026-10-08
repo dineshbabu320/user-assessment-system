@@ -92,6 +92,14 @@ class StudentTokenController extends Controller
             }
         }
 
+        // IDOR Protection: Prevent non-admins from issuing admin-level tokens
+        if (!Auth::user()->isAdmin()) {
+            $allowedExams = ['S1', 'S2', 'S3', 'C1'];
+            if (!in_array($examId, $allowedExams)) {
+                return redirect()->back()->with('error', 'You are not authorized to issue tokens for this exam.');
+            }
+        }
+
         $token = Token::create([
             'id' => $tokenId,
             'user_cid' => $user->cid,
@@ -102,7 +110,7 @@ class StudentTokenController extends Controller
 
         Mail::to($user->email)->queue(new TokenIssuedMail($token));
 
-        ActivityLogger::log("Issued token '{$tokenId}' for {$user->name} (CID: {$user->cid}) by " . auth()->user()->name);
+        ActivityLogger::log("Issued token '{$tokenId}' for {$user->name} ({$user->cid}) by " . auth()->user()->name . " (" . auth()->user()->cid . ")");
 
         return redirect()->back()->with('success', "Token issued for {$user->name} (CID: {$user->cid}) for the {$exam->name} exam.");
     }
@@ -118,7 +126,7 @@ class StudentTokenController extends Controller
 
         $token->update(['status' => 'revoked']);
 
-        ActivityLogger::log("Revoked token '{$token->id}' for {$token->user_cid} by " . auth()->user()->name);
+        ActivityLogger::log("Revoked token '{$token->id}' for user ({$token->user_cid}) by " . auth()->user()->name . " (" . auth()->user()->cid . ")");
 
         return redirect()->back()->with('success', "Token ID {$token->id} has been successfully revoked.");
     }

@@ -112,6 +112,7 @@
                                                     <option value="READY-C3">READY-C3</option>
                                                     <option value="READY-I1">READY-I1</option>
                                                     <option value="REC-I1">READY-I3</option>
+                                                    <option value="READY-ASEA FSS">READY-ASEA FSS</option>
                                                 @endif
                                             </select>
                                         </div>

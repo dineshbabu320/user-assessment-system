@@ -24,6 +24,150 @@
 
 @media (max-width: 639px) {
     #main-content {
-        margin-left: 0 !important; /* Remove margin for smaller screens */
+        margin-left: 0 !important;
+        /* Remove margin for smaller screens */
     }
 }
+
+/* TipTap Placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #9ca3af;
+    pointer-events: none;
+    height: 0;
+}
+
+/* Tighter paragraph spacing for the editor */
+.format p {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Simple DataTables Overrides for Flowbite Dark Mode */
+.datatable-wrapper {
+    @apply w-full;
+}
+
+.datatable-top {
+    @apply flex flex-col sm:flex-row justify-between items-center p-4;
+}
+
+/* Force standard layout: Dropdown on the left, Search on the right */
+.datatable-dropdown {
+    @apply order-2 sm:order-1 flex-shrink-0;
+}
+
+.datatable-search {
+    @apply order-1 sm:order-2 mb-4 sm:mb-0 w-full sm:w-auto flex justify-end;
+}
+
+.datatable-bottom {
+    @apply flex flex-col sm:flex-row justify-between items-center p-4 mt-2 border-t border-gray-200 dark:border-gray-700;
+}
+
+.datatable-info {
+    @apply text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-0;
+}
+
+.datatable-input {
+    @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full sm:w-64;
+}
+
+.datatable-selector {
+    @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 inline-block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mr-2;
+}
+
+.datatable-dropdown label {
+    @apply text-sm text-gray-500 dark:text-gray-400 flex items-center;
+}
+
+.datatable-pagination-list {
+    @apply flex items-center -space-x-px text-sm m-0 p-0 list-none;
+}
+
+.datatable-pagination-list li a {
+    @apply flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white;
+}
+
+.datatable-pagination-list li:first-child a {
+    @apply rounded-l-lg;
+}
+
+.datatable-pagination-list li:last-child a {
+    @apply rounded-r-lg;
+}
+
+.datatable-pagination-list li.active a {
+    @apply flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white;
+}
+
+.datatable-table>tbody>tr>td,
+.datatable-table>tbody>tr>th,
+.datatable-table>tfoot>tr>td,
+.datatable-table>tfoot>tr>th,
+.datatable-table>thead>tr>td,
+.datatable-table>thead>tr>th {
+    @apply align-middle px-6 py-4;
+}
+
+/* Ensure the table is visible properly */
+.datatable-table {
+    @apply w-full text-sm text-left text-gray-500 dark:text-gray-400;
+}
+
+.datatable-table thead th {
+    @apply text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-600 dark:text-white font-semibold;
+}
+
+.datatable-table tbody tr {
+    @apply bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700;
+}
+
+/* Sorting arrows */
+.datatable-sorter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+}
+
+.datatable-sorter::after {
+    content: "";
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 15l5 5 5-5M7 9l5-5 5 5'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.7;
+}
+
+.dark .datatable-sorter::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 15l5 5 5-5M7 9l5-5 5 5'/%3E%3C/svg%3E");
+    opacity: 0.85;
+}
+
+.asc .datatable-sorter::after {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 15l7-7 7 7'/%3E%3C/svg%3E");
+}
+
+.dark .asc .datatable-sorter::after {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 15l7-7 7 7'/%3E%3C/svg%3E");
+}
+
+.desc .datatable-sorter::after {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+}
+
+.dark .desc .datatable-sorter::after {
+    opacity: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+}
+

@@ -12,6 +12,7 @@
         <link rel="icon" href="{{ asset('favicon.png') }}" sizes="32x32">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])

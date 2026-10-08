@@ -54,7 +54,6 @@ class SubdivisionquestionsController extends Controller
 
         $exam_id = $request->exam_id ?? ($exams->first()->id ?? null);
         $allExams = $exams->where('id', '!=', $exam_id);
-
         $subdivisions = Subdivision::orderBy('name')->get();
         return view('subdivision.question-form', compact('exam_id', 'allExams', 'subdivisions'));
     }
@@ -177,7 +176,6 @@ class SubdivisionquestionsController extends Controller
 
         $exam_id = $question->exam_id;
         $allExams = $exams->where('id', '!=', $exam_id);
-        
         $subdivisions = Subdivision::orderBy('name')->get();
 
         return view('subdivision.question-form', compact('question', 'exam_id', 'allExams', 'subdivisions'));
@@ -320,5 +318,47 @@ class SubdivisionquestionsController extends Controller
         return response()->json(['subdivisions' => $subdivisions]);
     }
 
+    public function getQuestions(Request $request)
+    {
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'search' => 'nullable|string|max:255',
+        ]);
 
+        $query = Question::where('exam_id', $request->exam_id)->where('category','local');
+
+        // If admin, use selected subdivision; else use user's subdivision
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('subdivision_id')) {
+                $query->where('subdivision_id', $request->subdivision_id);
+            }
+        } else {
+            $query->where('subdivision_id', auth()->user()->subdivision_id);
+        }
+
+        // Add search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where('question_text', 'LIKE', '%' . $searchTerm . '%');
+        }
+
+        $questions = $query->with('answers')->paginate(10);
+        $total = $query->count();
+
+        $questions->getCollection()->transform(function ($question) {
+            return [
+                'id' => $question->id,
+                'question_text' => $question->question_text,
+                'question_type' => $question->question_type,
+                'subdivision_id' => $question->subdivision_id,
+                'points' => $question->points,
+            ];
+        });
+
+        return response()->json([
+            'questions' => $questions->items(),
+            'pagination' => $questions->links('pagination::tailwind')->render(),
+            'total' => $total,
+        ]);
+    }
 }

@@ -107,12 +107,10 @@ class SubdivisionquestionsController extends Controller
         
         $data['category'] = 'local';
 
-        if (function_exists('clean')) {
-            if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
-            if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
-            if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
-            if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
-        }
+        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');
@@ -226,12 +224,10 @@ class SubdivisionquestionsController extends Controller
             }
         }
 
-        if (function_exists('clean')) {
-            if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
-            if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
-            if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
-            if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
-        }
+        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');

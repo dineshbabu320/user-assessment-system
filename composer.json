@@ -14,6 +14,7 @@
         "laravel/nightwatch": "^1.7",
         "laravel/tinker": "^2.10.1",
         "league/commonmark": "2.7",
+        "mews/purifier": "^3.4",
         "sentry/sentry-laravel": "^4.13",
         "vatsim/oauth2-vatsim": "^1.0"
     },

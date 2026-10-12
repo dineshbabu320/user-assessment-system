@@ -81,7 +81,12 @@ class SubdivisionquestionsController extends Controller
             $validationRules['subdivision_id'] = 'required|string';
         }
 
-        $data = $request->validate($validationRules);
+        $validationMessages = [
+            'options.required_if' => 'The options field is required when question type is MCQ or Single Option.',
+            'correct_answers.required_if' => 'The correct answers field is required when question type is MCQ or Single Option.',
+        ];
+
+        $data = $request->validate($validationRules, $validationMessages);
 
         // If not admin, force their subdivision and validate exam IDs
         if (!auth()->user()->isAdmin()) {
@@ -102,10 +107,12 @@ class SubdivisionquestionsController extends Controller
         
         $data['category'] = 'local';
 
-        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
-        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
-        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
-        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
+        if (function_exists('clean')) {
+            if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+            if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+            if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+            if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
+        }
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');
@@ -193,6 +200,11 @@ class SubdivisionquestionsController extends Controller
                 ->firstOrFail();
         }
 
+        $validationMessages = [
+            'options.required_if' => 'The options field is required when question type is MCQ or Single Option.',
+            'correct_answers.required_if' => 'The correct answers field is required when question type is MCQ or Single Option.',
+        ];
+
         $data = $request->validate([
             'exam_id' => 'required|exists:exams,id',
             'subdivision_id' => 'required|string',
@@ -205,7 +217,7 @@ class SubdivisionquestionsController extends Controller
             'correct_comment' => 'nullable|string',
             'wrong_comment' => 'nullable|string',
             'answer_key' => 'nullable|string',
-        ]);
+        ], $validationMessages);
 
         if (!auth()->user()->isAdmin()) {
             $allowedExams = Exam::whereIn('name', ['S1', 'S2', 'S3', 'C1'])->pluck('id')->toArray();
@@ -214,10 +226,12 @@ class SubdivisionquestionsController extends Controller
             }
         }
 
-        if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
-        if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
-        if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
-        if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
+        if (function_exists('clean')) {
+            if (isset($data['question_text'])) $data['question_text'] = clean($data['question_text']);
+            if (isset($data['correct_comment'])) $data['correct_comment'] = clean($data['correct_comment']);
+            if (isset($data['wrong_comment'])) $data['wrong_comment'] = clean($data['wrong_comment']);
+            if (isset($data['answer_key'])) $data['answer_key'] = clean($data['answer_key']);
+        }
 
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('questions', 'public');

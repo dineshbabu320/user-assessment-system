@@ -1,6 +1,6 @@
-# User Assessment Backend
+# User Assessment System
 
-Backend web application and token issuance infrastructure for a regional flight simulation community.
+Web application and token issuance infrastructure for a regional flight simulation community.
 
 ## Tech Stack
 * PHP 8.2+
